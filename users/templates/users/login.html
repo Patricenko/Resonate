@@ -1,9 +1,29 @@
-<h1>User Login</h1>
-<form class="form-with-validation" action="{% url 'users:login' %}">
-    {% csrf_token %}
-    {{ form }}
-    {% if request.GET.next %}
-        <input type="hidden" name="next" value="{{ request.GET.next }}" />
-    {% endif %}
-    <button class="form-submit">Submit</button>
+{% extends "base.html" %}
+{% block title %}Login - Dinter{% endblock %}
+{% block content %}
+
+<h1 class="text-center mb-4">Login</h1>
+
+<form class="form-with-validation" method="post" action="{% url 'users:login' %}">
+  {% csrf_token %}
+
+  <div class="mb-3">
+    {{ form.username.label_tag }}
+    {{ form.username }}
+    {{ form.username.errors }}
+  </div>
+
+  <div class="mb-3">
+    {{ form.password.label_tag }}
+    {{ form.password }}
+    {{ form.password.errors }}
+  </div>
+
+  <button type="submit" class="form-submit">Login</button>
+
+  <div class="text-center mt-3">
+    <p>Don't have an account? <a href="{% url 'users:register' %}">Register here</a></p>
+  </div>
 </form>
+
+{% endblock %}

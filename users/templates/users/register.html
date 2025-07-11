@@ -1,6 +1,13 @@
-<h1>Register a New User</h1>
-<form class="form-with-validation" action="{% url 'users:register' %}">
+{% extends "base.html" %}
+{% block title %}Register - Dinter{% endblock %}
+{% block content %}
+
+<h1 class="text-center mb-4">Register a New User</h1>
+
+<form class="form-with-validation" method="post" action="{% url 'users:register' %}">
     {% csrf_token %}
-    {{ form }}
-    <button class="form-submit">Submit</button>
+    {{ form.as_p }}
+    <button type="submit" class="form-submit">Submit</button>
 </form>
+
+{% endblock %}

@@ -1,0 +1,81 @@
+/* Reset & base */
+html, body {
+  height: 100%;
+  margin: 0;
+  background-color: #0e0e0e;
+  color: #f1f1f1;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+body > main {
+  flex: 1;
+}
+
+/* Navbar */
+nav.navbar {
+  background-color: #111;
+  border-bottom: 2px solid #ff69b4;
+}
+
+.navbar-brand {
+  font-family: 'Pacifico', cursive;
+  font-size: 2rem;
+  color: #ff69b4 !important;
+}
+
+/* Links */
+a {
+  color: #ff69b4;
+}
+
+a:hover, a:focus {
+  color: #ff1493;
+  text-decoration: none;
+}
+
+/* Footer */
+footer {
+  background-color: #111;
+  border-top: 2px solid #ff69b4;
+  color: #ddd;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* Form styles */
+.form-with-validation {
+  background-color: #1a1a1a;
+  border: 1px solid #ff69b4;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 10px #ff69b4;
+  max-width: 450px;
+  margin: 0 auto;
+}
+
+.form-with-validation input {
+  background-color: #2a2a2a;
+  border: 1px solid #555;
+  color: white;
+}
+
+.form-submit {
+  background: linear-gradient(45deg, #ff1493, #ff69b4);
+  border: none;
+  color: white;
+  padding: 0.75rem;
+  width: 100%;
+  font-weight: bold;
+  border-radius: 5px;
+  box-shadow: 0 0 10px #ff69b4;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.form-submit:hover {
+  box-shadow: 0 0 20px #ff69b4;
+  background: linear-gradient(45deg, #ff69b4, #ff1493);
+}
