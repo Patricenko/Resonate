@@ -1,0 +1,6 @@
+<h1>Register a New User</h1>
+<form class="form-with-validation" action="{% url 'users:register' %}">
+    {% csrf_token %}
+    {{ form }}
+    <button class="form-submit">Submit</button>
+</form>
