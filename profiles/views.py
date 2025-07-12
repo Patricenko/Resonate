@@ -3,6 +3,10 @@ from django.contrib.auth.decorators import login_required
 from .forms import ProfileForm
 from .models import Profile
 from django.urls import reverse
+import os
+from dotenv import load_dotenv
+
+GOOGLE_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")  # Replace with your actual Google Maps API key
 
 @login_required
 def profile_detail_view(request, user_id):
@@ -21,7 +25,7 @@ def create_profile_view(request):
             return redirect(reverse('profiles:profile_detail', kwargs={'user_id': request.user.id}))
     else:
         form = ProfileForm()
-    return render(request, 'create_profile.html', {'form': form})
+    return render(request, 'create_profile.html', {'form': form, 'GOOGLE_API_KEY': GOOGLE_API_KEY})
 
 @login_required
 def edit_profile_view(request):
