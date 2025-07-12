@@ -1,61 +1,69 @@
 {% extends "base.html" %}
-{% block title %}{{ profile.name }} - Dinter{% endblock %}
+{% block title %}{{ profile.name }} - Profile | Dinter{% endblock %}
 
 {% block content %}
-<div class="container d-flex justify-content-center mt-5">
-  <div class="card profile-card shadow-lg" style="max-width: 400px; width: 100%; border-radius: 20px; overflow: hidden; background: #1a1a1a;">
+<div class="profile-fullscreen">
 
-    <!-- Profile Photo -->
-    <div class="profile-photo" style="height: 450px; background-image: url('{{ profile.profile_photo.url }}'); background-size: cover; background-position: center;"></div>
-
-    <!-- Profile Info -->
-    <div class="p-4 text-light">
-      <h2 class="mb-1 text-pink">{{ profile.name }}, {{ profile.age }}</h2>
-      <p class="mb-2 small text-muted">@{{ profile.user.username }}</p>
-      <p class="mb-2">{{ profile.location }} | {{ profile.get_gender_display }}</p>
-
-      {% if profile.bio %}
-        <p class="mb-3">{{ profile.bio }}</p>
-      {% else %}
-        <p class="text-muted fst-italic mb-3">No bio available.</p>
-      {% endif %}
-
-      <ul class="list-unstyled mb-3">
-        {% if profile.height %}
-          <li><strong>Height:</strong> {{ profile.height }} cm</li>
-        {% endif %}
-        {% if profile.interests %}
-          <li><strong>Interests:</strong> {{ profile.interests }}</li>
-        {% endif %}
-        {% if profile.social_links.email %}
-          <li><strong>Email:</strong> <a href="mailto:{{ profile.social_links.email }}" class="text-decoration-none text-pink">{{ profile.social_links.email }}</a></li>
-        {% endif %}
-      </ul>
-
-      <div class="mb-3">
-        <strong>Looking for:</strong> {{ profile.get_preferred_gender_display }}<br>
-        <strong>Age Range:</strong> {{ profile.preferred_age_min }} – {{ profile.preferred_age_max }}
-      </div>
-
-      {% if profile.audio_bio %}
-        <div class="mt-3">
-          <audio controls class="w-100">
-            <source src="{{ profile.audio_bio.url }}" type="audio/mpeg">
-            Your browser does not support the audio element.
-          </audio>
-        </div>
-      {% endif %}
-    </div>
+  <!-- Left: Profile Photo -->
+  <div class="profile-photo"
+       style="
+         background-image: url('{% if profile.profile_photo %}{{ profile.profile_photo.url }}{% else %}/static/images/default-avatar.jpg{% endif %}');
+         background-position: center;
+         background-size: cover;
+         aspect-ratio: 1 / 1;
+       ">
   </div>
-</div>
 
-<style>
-  .profile-card:hover {
-    box-shadow: 0 0 30px #ff69b4;
-    transition: box-shadow 0.3s ease-in-out;
-  }
-  .text-pink {
-    color: #ff69b4;
-  }
-</style>
+  <!-- Right: Profile Info -->
+  <div class="profile-info">
+    <h1 class="text-pink">{{ profile.name }}</h1>
+
+    {% if profile.bio %}
+      <p class="subtext">{{ profile.bio }}</p>
+    {% endif %}
+
+    <ul class="profile-details-list">
+      <li><strong>Username:</strong> {{ profile.user.username }}</li>
+      <li><strong>Gender:</strong> {{ profile.get_gender_display }}</li>
+      <li><strong>Age:</strong> {{ profile.age }}</li>
+      <li><strong>Height:</strong> {{ profile.height }} cm</li>
+      <li><strong>Location:</strong> {{ profile.location }}</li>
+      <li><strong>Preferred Gender:</strong> {{ profile.get_preferred_gender_display }}</li>
+      <li><strong>Preferred Age Range:</strong> {{ profile.preferred_age_min }}–{{ profile.preferred_age_max }}</li>
+      <li><strong>Public Profile:</strong> {{ profile.is_public|yesno:"Yes,No" }}</li>
+    </ul>
+
+    {% if interests_list %}
+      <div class="mt-4">
+        <strong>Interests:</strong>
+        <div class="interest-bubbles mt-2">
+          {% for interest in interests_list %}
+            <span class="interest-bubble">{{ interest }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if profile.audio_bio %}
+      <div class="audio-bio mt-4">
+        <audio controls>
+          <source src="{{ profile.audio_bio.url }}" type="audio/mpeg">
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+    {% endif %}
+
+    {% if profile.social_links %}
+      <div class="mt-4">
+        <strong>Social Links:</strong>
+        <ul class="profile-details-list">
+          {% for key, value in profile.social_links.items %}
+            <li><strong>{{ key|title }}:</strong> <a href="{{ value }}" target="_blank">{{ value }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
 {% endblock %}
