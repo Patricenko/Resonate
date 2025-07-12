@@ -83,3 +83,21 @@ footer {
 .form-check {
   margin-bottom: 1rem;
 }
+
+.border-pink {
+  border: 2px solid #ff69b4;
+}
+
+.text-pink {
+  color: #ff69b4;
+}
+
+.btn-outline-pink {
+  color: #ff69b4;
+  border-color: #ff69b4;
+}
+
+.btn-outline-pink:hover {
+  background-color: #ff69b4;
+  color: #fff;
+}
