@@ -1,6 +1,233 @@
-<h2>Edit Your Profile</h2>
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save Changes</button>
-</form>
+{% extends "base.html" %}
+{% load user_form_tags %}
+{% block title %}Edit Profile - Dinter{% endblock %}
+
+{% block content %}
+<div class="container my-5" style="max-width: 900px;">
+  <div class="form-with-validation p-4">
+    <h2 class="mb-4 text-center text-pink">Edit Your Dinter Profile</h2>
+    <form method="POST" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      <div class="row g-3">
+        {% for field in form %}
+          {% if field.name == 'is_public' %}
+            {# Skip is_public #}
+          {% elif field.name == 'interests' %}
+            <div class="col-12">
+              <label class="form-label">Interests</label>
+              <div id="interest-buttons" class="d-flex flex-wrap gap-2">
+                {% for interest in premade_interests %}
+                  <button
+                    type="button"
+                    class="interest-button btn btn-outline-pink rounded-pill"
+                    data-interest="{{ interest|lower }}"
+                  >
+                    {{ interest }}
+                  </button>
+                {% endfor %}
+              </div>
+              <input type="hidden" name="{{ field.name }}" id="id_interests" value="{{ field.value|join:',' }}">
+              {% if field.errors %}
+                <div class="text-danger small mt-1">
+                  {% for error in field.errors %}
+                    {{ error }}<br>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          {% elif field.name == 'profile_photo' %}
+            <div class="col-12">
+              <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+              {{ field|add_class:"form-control" }}
+              {% if field.errors %}
+                <div class="text-danger small mt-1">
+                  {% for error in field.errors %}
+                    {{ error }}<br>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          {% elif field.name in 'bio social_links audio_bio' %}
+            <div class="col-12">
+              <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+              {{ field|add_class:"form-control" }}
+              {% if field.errors %}
+                <div class="text-danger small mt-1">
+                  {% for error in field.errors %}
+                    {{ error }}<br>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          {% else %}
+            <div class="col-md-4">
+              <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+              {{ field|add_class:"form-control" }}
+              {% if field.errors %}
+                <div class="text-danger small mt-1">
+                  {% for error in field.errors %}
+                    {{ error }}<br>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <button type="submit" class="form-submit mt-4 w-100">Save Changes</button>
+    </form>
+  </div>
+</div>
+
+<!-- Cropper modal -->
+<div id="cropper-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.8); z-index:1050;
+  display: flex; justify-content: center; align-items: center;">
+  <div style="position: relative; max-width: 90vw; max-height: 80vh; background: #222; padding: 1rem; border-radius: 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+
+    <div style="align-self: flex-end; display: flex; gap: 0.5rem;">
+      <button id="cropper-cancel" style="background: #555; border:none; color:white; padding: 0.3rem 0.7rem; border-radius: 4px; cursor:pointer;">Cancel</button>
+      <button id="cropper-use" style="background: #ff69b4; border:none; color:white; padding: 0.3rem 0.7rem; border-radius: 4px; cursor:pointer;">Crop &amp; Use</button>
+    </div>
+
+    <img id="cropper-image" style="max-width: 80vw; max-height: 70vh; user-select:none;"/>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet"/>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Interests toggle buttons
+    const buttons = document.querySelectorAll(".interest-button");
+    const hiddenInput = document.getElementById("id_interests");
+    let selected = hiddenInput.value ? hiddenInput.value.split(",") : [];
+
+    buttons.forEach(btn => {
+      if (selected.includes(btn.dataset.interest)) {
+        btn.classList.add("selected", "btn-pink");
+        btn.classList.remove("btn-outline-pink");
+      } else {
+        btn.classList.add("btn-outline-pink");
+        btn.classList.remove("btn-pink");
+      }
+    });
+
+    buttons.forEach(button => {
+      button.addEventListener("click", () => {
+        const interest = button.dataset.interest;
+        if (selected.includes(interest)) {
+          selected = selected.filter(i => i !== interest);
+          button.classList.remove("selected", "btn-pink");
+          button.classList.add("btn-outline-pink");
+        } else {
+          selected.push(interest);
+          button.classList.add("selected", "btn-pink");
+          button.classList.remove("btn-outline-pink");
+        }
+        hiddenInput.value = selected.join(",");
+      });
+    });
+
+    // Cropper logic
+    const inputFile = document.querySelector('input[type="file"][name="profile_photo"]');
+    const cropperModal = document.getElementById("cropper-modal");
+    const cropperImage = document.getElementById("cropper-image");
+    const cropperCancel = document.getElementById("cropper-cancel");
+    const cropperUse = document.getElementById("cropper-use");
+    let cropper = null;
+
+    cropperModal.style.display = "none";
+
+    inputFile.addEventListener("change", function () {
+      const file = this.files[0];
+      if (!file) {
+        cropperModal.style.display = "none";
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      cropperImage.src = url;
+
+      cropperModal.style.display = "flex";
+
+      if (cropper) cropper.destroy();
+
+      cropper = new Cropper(cropperImage, {
+        aspectRatio: 1,
+        viewMode: 1,
+        movable: true,
+        zoomable: true,
+        rotatable: false,
+        scalable: false,
+        background: false,
+        autoCropArea: 1,
+      });
+    });
+
+    cropperCancel.addEventListener("click", () => {
+      cropperModal.style.display = "none";
+      inputFile.value = ""; // reset input if cancel
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
+      }
+    });
+
+    cropperUse.addEventListener("click", () => {
+      if (!cropper) return;
+
+      cropper.getCroppedCanvas({
+        width: 400,
+        height: 400,
+        imageSmoothingQuality: 'high'
+      }).toBlob(blob => {
+        const fileInput = inputFile;
+
+        const dataTransfer = new DataTransfer();
+        const newFile = new File([blob], "cropped_profile_photo.png", { type: "image/png" });
+        dataTransfer.items.add(newFile);
+        fileInput.files = dataTransfer.files;
+
+        cropperModal.style.display = "none";
+        cropper.destroy();
+        cropper = null;
+      }, "image/png");
+    });
+  });
+</script>
+
+<style>
+  .interest-button {
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    cursor: pointer;
+    user-select: none;
+    margin: 0.2rem;
+    font-weight: 600;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  /* Outline pink button */
+  .btn-outline-pink {
+    background-color: transparent !important;
+    color: #ff69b4 !important;
+    border: 2px solid #ff69b4 !important;
+  }
+
+  /* Filled pink button */
+  .btn-pink {
+    background-color: #ff69b4 !important;
+    color: white !important;
+    border-color: #ff69b4 !important;
+  }
+
+  /* Hover effect only for unselected buttons */
+  .interest-button.btn-outline-pink:hover {
+    background-color: #ff69b4 !important;
+    color: white !important;
+  }
+</style>
+{% endblock %}
