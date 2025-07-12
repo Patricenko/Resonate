@@ -28,15 +28,12 @@ def profile_detail_view(request, user_id):
 @login_required
 def profile_me_view(request):
     profile = get_object_or_404(Profile, user=request.user)
-
-    interests_list = []
-    if profile.interests:
-        interests_list = [i.strip() for i in profile.interests.split(",") if i.strip()]
-
+    interests_list = [i.strip() for i in (profile.interests or "").split(",") if i.strip()]
     return render(request, "profiles/profile.html", {
         "profile": profile,
         "interests_list": interests_list,
     })
+
 
 @login_required
 def create_profile_view(request):
@@ -44,18 +41,27 @@ def create_profile_view(request):
     if hasattr(request.user, 'profile'):
         return redirect('profiles:profile_me')
 
+    premade_interests = [
+        "Music", "Sports", "Art", "Technology", "Gaming",
+        "Reading", "Travel", "Cooking", "Fitness", "Movies"
+    ]
+
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES)
         if form.is_valid():
             profile = form.save(commit=False)
             profile.user = request.user
-            profile.is_public = True  # force public
+            profile.is_public = True
             profile.save()
             return redirect(reverse('profiles:profile_detail', kwargs={'user_id': request.user.id}))
     else:
         form = ProfileForm()
-    return render(request, 'create_profile.html', {'form': form, 'GOOGLE_API_KEY': GOOGLE_API_KEY})
 
+    return render(request, 'create_profile.html', {
+        'form': form,
+        'GOOGLE_API_KEY': GOOGLE_API_KEY,
+        'premade_interests': premade_interests,
+    })
 @login_required
 def edit_profile_view(request):
     try:
@@ -68,10 +74,18 @@ def edit_profile_view(request):
         "Reading", "Travel", "Cooking", "Fitness", "Movies"
     ]
 
+    current_interests = []
+    if profile.interests:
+        current_interests = [i.strip().lower() for i in profile.interests.split(",") if i.strip()]
+
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             profile = form.save(commit=False)
+            # Save interests as a clean comma-separated lowercase string
+            interests_str = request.POST.get('interests', '')
+            interests_list = [i.strip().lower() for i in interests_str.split(",") if i.strip()]
+            profile.interests = ",".join(interests_list)
             profile.is_public = True
             profile.save()
             return redirect('profiles:profile_detail', user_id=request.user.id)
@@ -81,6 +95,8 @@ def edit_profile_view(request):
     context = {
         'form': form,
         'premade_interests': premade_interests,
+        'current_interests': current_interests,
+        'GOOGLE_API_KEY': GOOGLE_API_KEY,
     }
     return render(request, 'edit_profile.html', context)
 

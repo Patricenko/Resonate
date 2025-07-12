@@ -26,7 +26,8 @@
                   </button>
                 {% endfor %}
               </div>
-              <input type="hidden" name="{{ field.name }}" id="id_interests" value="{{ field.value|join:',' }}">
+              <!-- Fix here: output raw string value, no join -->
+              <input type="hidden" name="{{ field.name }}" id="id_interests" value="{{ field.value|default:'' }}">
               {% if field.errors %}
                 <div class="text-danger small mt-1">
                   {% for error in field.errors %}
@@ -231,3 +232,4 @@
   }
 </style>
 {% endblock %}
+
