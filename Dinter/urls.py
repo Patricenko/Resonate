@@ -26,6 +26,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', include('users.urls', namespace='users')),
     path('profiles/', include('profiles.urls', namespace='profiles')),
+    path('matching/', include('matching.urls', namespace='matching')),
     path('', index_view, name='index'),  # Homepage view
 ]
 
