@@ -8,10 +8,14 @@
 
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 
   <!-- Your custom CSS -->
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
 
+  {% block extra_css %}{% endblock %}
   {% block head %}{% endblock %}
 </head>
 <body>
@@ -21,6 +25,19 @@
 
       <div class="d-flex align-items-center">
         {% if user.is_authenticated %}
+          <!-- Navigation Menu -->
+          <div class="navbar-nav me-3">
+            <a class="nav-link text-light me-3" href="{% url 'matching:match' %}">
+              <i class="fas fa-heart"></i> Discover
+            </a>
+            <a class="nav-link text-light me-3" href="{% url 'matching:matches' %}">
+              <i class="fas fa-fire"></i> Matches
+            </a>
+            <a class="nav-link text-light me-3" href="{% url 'profiles:profile_detail' user.id %}">
+              <i class="fas fa-user"></i> Profile
+            </a>
+          </div>
+          
           {% if user.profile.profile_photo %}
             <div class="dropdown">
               <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false" role="button" aria-haspopup="true">
@@ -28,6 +45,7 @@
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
                 <li><a class="dropdown-item" href="{% url 'profiles:profile_detail' user.id %}">View Profile</a></li>
+                <li><a class="dropdown-item" href="{% url 'profiles:edit_profile' %}">Edit Profile</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                   <form method="post" action="{% url 'users:logout' %}" class="m-0">

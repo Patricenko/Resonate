@@ -1,11 +1,12 @@
 from django.urls import path
 from . import views
-from django.urls import include
 
 app_name = 'matching'
 
 urlpatterns = [
-    # path('match/', views.match_view, name='match'),
-    # path('results/', views.results_view, name='results'),
+    path('', views.match_view, name='match'),
+    path('like/', views.like_profile, name='like_profile'),
+    path('pass/', views.pass_profile, name='pass_profile'),
+    path('matches/', views.matches_view, name='matches'),
 ]
 

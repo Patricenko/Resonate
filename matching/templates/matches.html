@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Your Matches{% endblock %}
+
+{% block extra_css %}
+<style>
+    .matches-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .matches-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .matches-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .match-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .match-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .match-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 36px;
+    }
+
+    .match-info {
+        padding: 15px;
+    }
+
+    .match-name {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .match-details {
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .match-date {
+        color: #999;
+        font-size: 12px;
+        text-align: right;
+    }
+
+    .no-matches {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+
+    .no-matches i {
+        font-size: 48px;
+        margin-bottom: 20px;
+        color: #ddd;
+    }
+
+    .btn-start-matching {
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-start-matching:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="matches-container">
+    <div class="matches-header">
+        <h2><i class="fas fa-heart"></i> Your Matches</h2>
+        <p>People who liked you back!</p>
+    </div>
+
+    {% if matches %}
+        <div class="matches-grid">
+            {% for match_data in matches %}
+                <div class="match-card">
+                    <div class="match-image">
+                        {% if match_data.other_profile.profile_photo %}
+                            <img src="{{ match_data.other_profile.profile_photo.url }}" 
+                                 alt="{{ match_data.other_profile.name }}" 
+                                 class="match-image">
+                        {% else %}
+                            <i class="fas fa-user"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="match-info">
+                        <div class="match-name">{{ match_data.other_profile.name }}</div>
+                        <div class="match-details">
+                            <i class="fas fa-birthday-cake"></i> {{ match_data.other_profile.age }} • 
+                            <i class="fas fa-map-marker-alt"></i> {{ match_data.other_profile.location }}
+                        </div>
+                        {% if match_data.other_profile.bio %}
+                            <div class="match-bio">{{ match_data.other_profile.bio|truncatewords:15 }}</div>
+                        {% endif %}
+                        <div class="match-date">
+                            Matched {{ match_data.match.created_at|timesince }} ago
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-matches">
+            <i class="fas fa-heart-broken"></i>
+            <h3>No matches yet</h3>
+            <p>Start swiping to find your perfect match!</p>
+            <a href="{% url 'matching:match' %}" class="btn-start-matching">
+                <i class="fas fa-search"></i> Start Matching
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
