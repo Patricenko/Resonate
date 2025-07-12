@@ -77,6 +77,7 @@ def like_profile(request):
                 liked=request.user
             ).exists()
             
+            match_data = None
             is_match = False
             if mutual_like:
                 # Create a match
@@ -85,11 +86,24 @@ def like_profile(request):
                     user2=max(request.user, liked_user, key=lambda u: u.id)
                 )
                 is_match = match_created
+                
+                if match_created:
+                    # Get match data for popup
+                    match_data = {
+                        'match_id': match.id,
+                        'other_user': {
+                            'username': liked_user.username,
+                            'name': liked_profile.name,
+                            'profile_photo': liked_profile.profile_photo.url if liked_profile.profile_photo else None,
+                            'age': liked_profile.age
+                        }
+                    }
             
             return JsonResponse({
                 'success': True,
                 'is_match': is_match,
-                'liked_user': liked_user.username
+                'liked_user': liked_user.username,
+                'match_data': match_data
             })
             
         except Profile.DoesNotExist:
@@ -142,13 +156,82 @@ def matches_view(request):
             match_data.append({
                 'match': match,
                 'other_user': other_user,
-                'other_profile': other_profile
+                'other_profile': other_profile,
+                'is_new': match.is_new_for_user(current_user)
             })
         except Profile.DoesNotExist:
             continue
+    
+    # Mark all matches as seen when viewing the matches page
+    for match in matches:
+        match.mark_seen_by_user(current_user)
     
     context = {
         'matches': match_data
     }
     
     return render(request, 'matches.html', context)
+
+
+@login_required
+def get_new_matches_count(request):
+    """Get count of new matches for the current user"""
+    current_user = request.user
+    
+    # Get all matches where current user is either user1 or user2 and hasn't seen them
+    new_matches_count = Match.objects.filter(
+        Q(user1=current_user, user1_seen=False) | 
+        Q(user2=current_user, user2_seen=False)
+    ).count()
+    
+    return JsonResponse({'new_matches_count': new_matches_count})
+
+
+@login_required
+def mark_match_seen(request):
+    """Mark a match as seen by the current user"""
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        match_id = data.get('match_id')
+        
+        try:
+            match = Match.objects.get(id=match_id)
+            match.mark_seen_by_user(request.user)
+            
+            return JsonResponse({'success': True})
+        except Match.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Match not found'})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+
+@login_required
+def get_latest_match(request):
+    """Get the latest unseen match for popup notification"""
+    current_user = request.user
+    
+    # Get the most recent unseen match
+    latest_match = Match.objects.filter(
+        Q(user1=current_user, user1_seen=False) | 
+        Q(user2=current_user, user2_seen=False)
+    ).order_by('-created_at').first()
+    
+    if latest_match:
+        # Get the other user's profile
+        other_user = latest_match.user2 if latest_match.user1 == current_user else latest_match.user1
+        try:
+            other_profile = Profile.objects.get(user=other_user)
+            return JsonResponse({
+                'success': True,
+                'match_id': latest_match.id,
+                'other_user': {
+                    'username': other_user.username,
+                    'name': other_profile.name,
+                    'profile_photo': other_profile.profile_photo.url if other_profile.profile_photo else None,
+                    'age': other_profile.age
+                }
+            })
+        except Profile.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Profile not found'})
+    
+    return JsonResponse({'success': False, 'error': 'No new matches'})

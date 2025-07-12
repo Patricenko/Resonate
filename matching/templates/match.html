@@ -115,23 +115,6 @@
         color: #666;
     }
 
-    .match-notification {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-        color: white;
-        padding: 30px;
-        border-radius: 20px;
-        font-size: 18px;
-        font-weight: bold;
-        z-index: 1000;
-        display: none;
-        text-align: center;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-
     .audio-player {
         margin: 15px 0;
         width: 100%;
@@ -203,12 +186,6 @@
     {% endif %}
 </div>
 
-<div class="match-notification" id="match-notification">
-    <h3>🎉 It's a Match! 🎉</h3>
-    <p id="match-message"></p>
-    <button onclick="closeMatchNotification()" class="btn btn-light mt-3">Continue</button>
-</div>
-
 <script>
 function getCookie(name) {
     let cookieValue = null;
@@ -242,10 +219,13 @@ function likeProfile(profileId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            if (data.is_match) {
-                document.getElementById('match-message').textContent = 
-                    `You and ${data.liked_user} liked each other!`;
-                document.getElementById('match-notification').style.display = 'block';
+            if (data.is_match && data.match_data) {
+                // Use the global popup function from base.html
+                if (window.showMatchNotification) {
+                    window.showMatchNotification(data.match_data);
+                }
+                // Load next profile after a short delay
+                setTimeout(loadNextProfile, 1000);
             } else {
                 loadNextProfile();
             }
@@ -294,11 +274,6 @@ function passProfile(profileId) {
 function loadNextProfile() {
     // Reload the page to get the next profile
     window.location.reload();
-}
-
-function closeMatchNotification() {
-    document.getElementById('match-notification').style.display = 'none';
-    loadNextProfile();
 }
 
 // Add keyboard support
