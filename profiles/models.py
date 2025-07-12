@@ -26,8 +26,8 @@ class Profile(models.Model):
     height = models.PositiveIntegerField(help_text="Height in cm")
     interests = models.CharField(max_length=255, blank=True)
     bio = models.TextField(max_length=500, blank=True)
-    audio_bio = models.FileField(upload_to='media/audio_player/', default='media/IMG_2466.JPG')
-    profile_photo = models.ImageField(upload_to='profile_photos/', default='media/IMG_2466.JPG')
+    audio_bio = models.FileField(upload_to='media/audio_player/', default='media/audio_player/IMG_2466.JPG')
+    profile_photo = models.ImageField(upload_to='profile_photos/', default='media/audio_player/IMG_2466.JPG')
     social_links = models.JSONField(default=contact_default, blank=True)  # Store social links as a JSON object
     is_public = models.BooleanField(default=True)  # Profile visibility
     preferred_gender = models.CharField(max_length=1, choices=PREFERED_GENDER_CHOICES, default='O')
