@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}404 - Page Not Found | Dinter{% endblock %}
+
+{% block head %}
+<style>
+  /* Override base container styles for full height and dark bg */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #111 !important; /* full dark background */
+      color: #ff69b4; /* pink text color globally */
+    }
+
+    body > * {
+      background-color: transparent !important;
+    }
+
+    main.container {
+      background-color: transparent !important;
+      min-height: 100vh !important;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 0 !important;
+      margin: 0 auto !important;
+      max-width: 100% !important;
+    }
+
+    /* Remove Bootstrap container max-width restrictions for error page */
+    .container {
+      max-width: 100% !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    /* Footer fixed at bottom with dark bg */
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: #111;
+      border-top: 2px solid #ff69b4;
+      color: #ddd;
+      padding: 12px 0;
+      text-align: center;
+      z-index: 10;
+    }
+
+    /* Error content styling */
+    .error-content {
+      text-align: center;
+      max-width: 600px;
+      padding: 20px;
+      color: #ff69b4;
+    }
+
+    .error-content h1 {
+      font-size: 10rem;
+      font-weight: 900;
+      margin-bottom: 0.3rem;
+      text-shadow: 0 0 15px #ff69b4;
+    }
+
+    .error-content h2 {
+      font-weight: 600;
+      color: #ffb6c1;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 8px #ff69b4;
+    }
+
+    .error-content p {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      color: #eee;
+    }
+
+    .btn-outline-pink {
+      border-color: #ff69b4 !important;
+      color: #ff69b4 !important;
+    }
+
+    .btn-outline-pink:hover {
+      background-color: #ff69b4 !important;
+      color: #111 !important;
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-content">
+  <h1>404</h1>
+  <h2>Oops! Page Not Found</h2>
+  <p>The page you’re looking for doesn’t exist or has been moved.</p>
+  <a href="/" class="btn btn-lg btn-outline-pink px-5 py-3" style="font-weight: 600; border-width: 2px;">
+    Go back home
+  </a>
+</div>
+{% endblock %}

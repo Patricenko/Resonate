@@ -15,9 +15,37 @@
   {% block head %}{% endblock %}
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="/">Dinter</a>
+  <nav class="navbar navbar-expand-lg px-4" style="background-color: #090909; border-bottom: 2px solid #ff69b4;">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+      <a class="navbar-brand d-flex align-items-center" href="/">
+        <img src="{% static 'images/logo4.png' %}" alt="Resonate Logo" height="40" class="me-2" style="object-fit: contain;">
+        <span class="text-pink fw-bold d-none d-sm-inline"></span>
+      </a>
+
+      <div class="d-flex align-items-center">
+        {% if user.is_authenticated %}
+          {% if user.profile.profile_photo %}
+            <div class="dropdown">
+              <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false" role="button" aria-haspopup="true">
+                <img src="{{ user.profile.profile_photo.url }}" alt="Avatar" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                <li><a class="dropdown-item" href="{% url 'profiles:profile_me' %}">View Profile</a></li>
+                <li><a class="dropdown-item" href="{% url 'profiles:edit_profile' %}">Edit Profile</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <form method="post" action="{% url 'users:logout' %}" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-item text-danger">Log out</button>
+                  </form>
+                </li>
+              </ul>
+            </div>
+          {% endif %}
+        {% else %}
+          <a href="{% url 'users:login' %}" class="btn btn-outline-pink">Log In</a>
+        {% endif %}
+      </div>
     </div>
   </nav>
 
@@ -25,7 +53,7 @@
     {% block content %}{% endblock %}
   </main>
 
-  <footer>
+  <footer class="text-center py-3" style="background-color: #111; border-top: 2px solid #ff69b4; color: #ddd;">
     &copy; 2025 NextSteps Hacks - TEAM XXX ⚡
   </footer>
 

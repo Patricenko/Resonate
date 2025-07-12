@@ -32,3 +32,7 @@ def login_view(request):
 @require_GET
 def dashboard_view(request):
     return render(request, "users/dashboard.html")
+
+def logout_view(request):
+    logout(request)
+    return redirect('users:login')

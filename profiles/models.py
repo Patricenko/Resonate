@@ -20,13 +20,14 @@ class Profile(models.Model):
         return {"email": "to1@example.com"}
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    name = models.CharField(max_length=100)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     age = models.PositiveIntegerField()
     location = models.CharField(max_length=100)
     height = models.PositiveIntegerField(help_text="Height in cm")
     interests = models.CharField(max_length=255, blank=True)
     bio = models.TextField(max_length=500, blank=True)
-    audio_bio = models.FileField(upload_to='media/audio_player/', default='media/audio_player/IMG_2466.JPG')
+    audio_bio = models.FileField(upload_to='media/audio_player/', default='media/audio_player/Thunderstorm.mp3')
     profile_photo = models.ImageField(upload_to='profile_photos/', default='media/audio_player/IMG_2466.JPG')
     social_links = models.JSONField(default=contact_default, blank=True)  # Store social links as a JSON object
     is_public = models.BooleanField(default=True)  # Profile visibility

@@ -10,18 +10,47 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")  # Replace with your actual Go
 
 @login_required
 def profile_detail_view(request, user_id):
+    if request.user.id != user_id:
+        return redirect('profiles:profile_me')
     profile = get_object_or_404(Profile, user__id=user_id)
-    return render(request, "profiles/profile.html", {"profile": profile})
+
+    # Prepare interests list safely
+    interests_list = []
+    if profile.interests:
+        interests_list = [i.strip() for i in profile.interests.split(",") if i.strip()]
+
+    return render(request, "profiles/profile.html", {
+        "profile": profile,
+        "interests_list": interests_list,
+    })
+
+
+@login_required
+def profile_me_view(request):
+    profile = get_object_or_404(Profile, user=request.user)
+
+    interests_list = []
+    if profile.interests:
+        interests_list = [i.strip() for i in profile.interests.split(",") if i.strip()]
+
+    return render(request, "profiles/profile.html", {
+        "profile": profile,
+        "interests_list": interests_list,
+    })
 
 @login_required
 def create_profile_view(request):
+    # Redirect if profile already exists
+    if hasattr(request.user, 'profile'):
+        return redirect('profiles:profile_me')
+
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES)
         if form.is_valid():
             profile = form.save(commit=False)
             profile.user = request.user
+            profile.is_public = True  # force public
             profile.save()
-            # Tu je zmena – použitie namespaces
             return redirect(reverse('profiles:profile_detail', kwargs={'user_id': request.user.id}))
     else:
         form = ProfileForm()
@@ -32,14 +61,26 @@ def edit_profile_view(request):
     try:
         profile = request.user.profile
     except Profile.DoesNotExist:
-        return redirect('create_profile')  # Redirect to creation if profile doesn't exist
+        return redirect('profiles:create_profile')
+
+    premade_interests = [
+        "Music", "Sports", "Art", "Technology", "Gaming",
+        "Reading", "Travel", "Cooking", "Fitness", "Movies"
+    ]
 
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
-            form.save()
-            return redirect('profile_detail', user_id=request.user.id)
+            profile = form.save(commit=False)
+            profile.is_public = True
+            profile.save()
+            return redirect('profiles:profile_detail', user_id=request.user.id)
     else:
         form = ProfileForm(instance=profile)
 
-    return render(request, 'edit_profile.html', {'form': form})
+    context = {
+        'form': form,
+        'premade_interests': premade_interests,
+    }
+    return render(request, 'edit_profile.html', context)
+
