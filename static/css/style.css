@@ -92,12 +92,17 @@ footer {
   color: #ff69b4;
 }
 
-.btn-outline-pink {
-  color: #ff69b4;
-  border-color: #ff69b4;
-}
-
 .btn-outline-pink:hover {
   background-color: #ff69b4;
   color: #fff;
 }
+
+.btn-outline-pink {
+  border: 1px solid #ff69b4;
+  color: #ff69b4;
+}
+.btn-outline-pink:hover {
+  background-color: #ff69b4;
+  color: white;
+}
+

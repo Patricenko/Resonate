@@ -20,6 +20,7 @@ class Profile(models.Model):
         return {"email": "to1@example.com"}
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    name = models.CharField(max_length=100)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     age = models.PositiveIntegerField()
     location = models.CharField(max_length=100)

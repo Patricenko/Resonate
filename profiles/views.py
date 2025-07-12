@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import ProfileForm
 from .models import Profile
 from django.urls import reverse
+from django.contrib.auth import logout
 
 @login_required
 def profile_detail_view(request, user_id):
@@ -17,7 +18,6 @@ def create_profile_view(request):
             profile = form.save(commit=False)
             profile.user = request.user
             profile.save()
-            # Tu je zmena – použitie namespaces
             return redirect(reverse('profiles:profile_detail', kwargs={'user_id': request.user.id}))
     else:
         form = ProfileForm()
@@ -28,14 +28,15 @@ def edit_profile_view(request):
     try:
         profile = request.user.profile
     except Profile.DoesNotExist:
-        return redirect('create_profile')  # Redirect to creation if profile doesn't exist
+        return redirect('profiles:create_profile')  # add namespace here
 
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
-            return redirect('profile_detail', user_id=request.user.id)
+            return redirect('profiles:profile_detail', user_id=request.user.id)
     else:
         form = ProfileForm(instance=profile)
 
     return render(request, 'edit_profile.html', {'form': form})
+
