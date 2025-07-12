@@ -213,6 +213,200 @@
       showMatchPopup(matchData);
       updateNewMatchesBadge();
     };
+
+    // Profile Popup System
+    function showProfilePopup(profileId) {
+      fetch(`/matching/api/profile/${profileId}/`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const profile = data.profile;
+            
+            // Create profile popup HTML
+            const profilePopupHtml = `
+              <div id="profile-popup" class="position-fixed top-50 start-50 translate-middle bg-white rounded-4 shadow-lg" style="z-index: 1050; max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto;">
+                <div class="position-relative">
+                  <!-- Close Button -->
+                  <button class="btn-close position-absolute top-0 end-0 m-3" style="z-index: 10;" onclick="closeProfilePopup()"></button>
+                  
+                  <!-- Profile Header -->
+                  <div class="text-center p-4 bg-gradient" style="background: linear-gradient(135deg, #ff69b4, #ff1493); border-radius: 1rem 1rem 0 0;">
+                    <div class="profile-photo-container mb-3">
+                      ${profile.profile_photo ? 
+                        `<img src="${profile.profile_photo}" alt="Profile" class="rounded-circle border border-4 border-white" width="120" height="120" style="object-fit: cover;">` : 
+                        `<div class="rounded-circle bg-light mx-auto d-flex align-items-center justify-content-center border border-4 border-white" style="width: 120px; height: 120px;"><i class="fas fa-user fa-3x text-muted"></i></div>`
+                      }
+                    </div>
+                    <h3 class="text-white mb-1">${profile.name}</h3>
+                    <p class="text-white opacity-75 mb-0">${profile.age} years old • ${profile.gender}</p>
+                  </div>
+                  
+                  <!-- Profile Details -->
+                  <div class="p-4">
+                    <div class="row g-3 mb-4">
+                      <div class="col-6">
+                        <div class="text-center p-3 bg-light rounded">
+                          <i class="fas fa-map-marker-alt text-primary mb-2"></i>
+                          <div class="small text-muted">Location</div>
+                          <div class="fw-bold">${profile.location || 'Not specified'}</div>
+                        </div>
+                      </div>
+                      <div class="col-6">
+                        <div class="text-center p-3 bg-light rounded">
+                          <i class="fas fa-ruler-vertical text-primary mb-2"></i>
+                          <div class="small text-muted">Height</div>
+                          <div class="fw-bold">${profile.height ? profile.height + ' cm' : 'Not specified'}</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    ${profile.bio ? `
+                      <div class="mb-4">
+                        <h6 class="text-muted mb-2"><i class="fas fa-quote-left me-2"></i>About</h6>
+                        <p class="mb-0">${profile.bio}</p>
+                      </div>
+                    ` : ''}
+                    
+                    ${profile.interests ? `
+                      <div class="mb-4">
+                        <h6 class="text-muted mb-2"><i class="fas fa-heart me-2"></i>Interests</h6>
+                        <div class="badge-container">
+                          ${profile.interests.split(',').map(interest => 
+                            `<span class="badge bg-secondary me-1 mb-1">${interest.trim()}</span>`
+                          ).join('')}
+                        </div>
+                      </div>
+                    ` : ''}
+                    
+                    ${profile.audio_bio ? `
+                      <div class="mb-4">
+                        <h6 class="text-muted mb-2"><i class="fas fa-microphone me-2"></i>Voice Message</h6>
+                        <audio controls class="w-100">
+                          <source src="${profile.audio_bio}" type="audio/mpeg">
+                          Your browser does not support the audio element.
+                        </audio>
+                      </div>
+                    ` : ''}
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 justify-content-center">
+                      ${profile.is_match ? `
+                        <button class="btn btn-success flex-fill">
+                          <i class="fas fa-comment"></i> Message
+                        </button>
+                      ` : `
+                        ${!profile.has_liked && !profile.has_passed ? `
+                          <button class="btn btn-outline-danger" onclick="passProfileFromPopup(${profile.id})">
+                            <i class="fas fa-times"></i> Pass
+                          </button>
+                          <button class="btn btn-pink flex-fill" onclick="likeProfileFromPopup(${profile.id})">
+                            <i class="fas fa-heart"></i> Like
+                          </button>
+                        ` : `
+                          ${profile.has_liked ? `
+                            <div class="text-center text-success">
+                              <i class="fas fa-heart"></i> You liked this profile
+                            </div>
+                          ` : `
+                            <div class="text-center text-muted">
+                              <i class="fas fa-times"></i> You passed on this profile
+                            </div>
+                          `}
+                        `}
+                      `}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div id="profile-popup-backdrop" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50" style="z-index: 1040;" onclick="closeProfilePopup()"></div>
+            `;
+            
+            // Add popup to body
+            document.body.insertAdjacentHTML('beforeend', profilePopupHtml);
+          } else {
+            alert('Error loading profile: ' + data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error loading profile:', error);
+          alert('Error loading profile. Please try again.');
+        });
+    }
+
+    // Close profile popup
+    function closeProfilePopup() {
+      const popup = document.getElementById('profile-popup');
+      const backdrop = document.getElementById('profile-popup-backdrop');
+      if (popup) popup.remove();
+      if (backdrop) backdrop.remove();
+    }
+
+    // Like profile from popup
+    function likeProfileFromPopup(profileId) {
+      fetch('{% url "matching:like_profile" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+          'profile_id': profileId
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          closeProfilePopup();
+          if (data.is_match && data.match_data) {
+            showMatchPopup(data.match_data);
+          }
+          updateNewMatchesBadge();
+          // Refresh page if on matching page
+          if (window.location.pathname.includes('/matching/')) {
+            setTimeout(() => window.location.reload(), 1000);
+          }
+        } else {
+          alert('Error: ' + data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+      });
+    }
+
+    // Pass profile from popup
+    function passProfileFromPopup(profileId) {
+      fetch('{% url "matching:pass_profile" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+          'profile_id': profileId
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          closeProfilePopup();
+          // Refresh page if on matching page
+          if (window.location.pathname.includes('/matching/')) {
+            setTimeout(() => window.location.reload(), 1000);
+          }
+        } else {
+          alert('Error: ' + data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+      });
+    }
+
+    // Make showProfilePopup globally available
+    window.showProfilePopup = showProfilePopup;
   </script>
   {% endif %}
 </body>

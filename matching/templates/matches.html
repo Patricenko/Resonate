@@ -29,10 +29,12 @@
         overflow: hidden;
         transition: transform 0.3s ease;
         position: relative;
+        cursor: pointer;
     }
 
     .match-card:hover {
         transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     }
 
     .match-card.new-match {
@@ -144,7 +146,8 @@
     {% if matches %}
         <div class="matches-grid">
             {% for match_data in matches %}
-                <div class="match-card{% if match_data.is_new %} new-match{% endif %}">
+                <div class="match-card{% if match_data.is_new %} new-match{% endif %}" 
+                     onclick="showProfilePopup({{ match_data.other_profile.id }})">
                     {% if match_data.is_new %}
                         <div class="new-match-badge">
                             <i class="fas fa-star"></i> NEW

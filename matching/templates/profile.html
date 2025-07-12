@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - {{ user.username }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .profile-container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .profile-pic {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+        }
+        .profile-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .info-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-header">
+            <img src="{{ profile.photo.url|default:'/static/default-avatar.png' }}" alt="Profile Picture" class="profile-pic">
+            <h1>{{ profile.name|default:user.username }}</h1>
+            <p>{{ profile.age }} years old</p>
+        </div>
+
+        <div class="profile-info">
+            <div class="info-item">
+                <div class="info-label">Location</div>
+                <div>{{ profile.location|default:"Not specified" }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Interests</div>
+                <div>{{ profile.interests|default:"No interests listed" }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Occupation</div>
+                <div>{{ profile.occupation|default:"Not specified" }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Education</div>
+                <div>{{ profile.education|default:"Not specified" }}</div>
+            </div>
+        </div>
+
+        <div class="profile-bio">
+            <h3>About Me</h3>
+            <p>{{ profile.bio|default:"No bio available" }}</p>
+        </div>
+
+        <div class="profile-actions">
+            <a href="{% url 'matching' %}" class="btn">Back to Matching</a>
+        </div>
+    </div>
+</body>
+</html>

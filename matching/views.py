@@ -235,3 +235,45 @@ def get_latest_match(request):
             return JsonResponse({'success': False, 'error': 'Profile not found'})
     
     return JsonResponse({'success': False, 'error': 'No new matches'})
+
+
+@login_required
+def get_profile_popup(request, profile_id):
+    """Get profile details for popup display"""
+    try:
+        profile = Profile.objects.get(id=profile_id)
+        
+        # Check if current user has interacted with this profile
+        current_user = request.user
+        has_liked = Like.objects.filter(liker=current_user, liked=profile.user).exists()
+        has_passed = Pass.objects.filter(passer=current_user, passed=profile.user).exists()
+        
+        # Check if there's a mutual match
+        is_match = Match.objects.filter(
+            Q(user1=current_user, user2=profile.user) | 
+            Q(user1=profile.user, user2=current_user)
+        ).exists()
+        
+        profile_data = {
+            'id': profile.id,
+            'name': profile.name,
+            'age': profile.age,
+            'location': profile.location,
+            'height': profile.height,
+            'bio': profile.bio,
+            'interests': profile.interests,
+            'profile_photo': profile.profile_photo.url if profile.profile_photo else None,
+            'audio_bio': profile.audio_bio.url if profile.audio_bio else None,
+            'has_liked': has_liked,
+            'has_passed': has_passed,
+            'is_match': is_match,
+            'gender': profile.get_gender_display()
+        }
+        
+        return JsonResponse({
+            'success': True,
+            'profile': profile_data
+        })
+        
+    except Profile.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Profile not found'})

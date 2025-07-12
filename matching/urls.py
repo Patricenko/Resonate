@@ -11,5 +11,6 @@ urlpatterns = [
     path('api/new-matches-count/', views.get_new_matches_count, name='new_matches_count'),
     path('api/mark-match-seen/', views.mark_match_seen, name='mark_match_seen'),
     path('api/latest-match/', views.get_latest_match, name='latest_match'),
+    path('api/profile/<int:profile_id>/', views.get_profile_popup, name='profile_popup'),
 ]
 
