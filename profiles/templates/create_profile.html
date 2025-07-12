@@ -33,6 +33,32 @@
                     {{ error }}<br>
                   {% endfor %}
                 </div>
+
+                {% if field.errors %}
+                  <div class="text-danger small mt-1">
+                    {% for error in field.errors %}
+                      {{ error }}<br>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              {% else %}
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+
+                {# Apply Autocomplete only to 'location' field #}
+                {% if field.name == 'location' %}
+                  {{ field|add_class:"form-control" }}
+                {% else %}
+                  {{ field|add_class:"form-control" }}
+                {% endif %}
+
+                {% if field.errors %}
+                  <div class="text-danger small mt-1">
+                    {% for error in field.errors %}
+                      {{ error }}<br>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+
               {% endif %}
             </div>
           {% elif field.name == 'profile_photo' %}
@@ -95,6 +121,35 @@
 
   </div>
 </div>
+
+<!-- Google Maps JavaScript API with Places -->
+<script src="https://maps.googleapis.com/maps/api/js?key={{GOOGLE_API_KEY}}&libraries=places" defer></script>
+
+<!-- Load the new Place Autocomplete Web Component -->
+<script type="module" src="https://unpkg.com/@googlemaps/places-autocomplete-element"></script>
+
+<script>
+  window.addEventListener('load', function () {
+    const input = document.getElementById('id_location');
+    if (!input) return;
+
+    const autocomplete = new google.maps.places.Autocomplete(input, {
+      types: ['geocode'],  // or ['address']
+      componentRestrictions: { country: ['sk', 'cz'] } // ak chceš obmedziť
+    });
+
+    autocomplete.addListener('place_changed', function () {
+      const place = autocomplete.getPlace();
+      if (!place.geometry) {
+        console.log("No geometry found for place:", place);
+        return;
+      }
+      // V prípade potreby: napr. ulož aj latitude/longitude
+      console.log("Selected place:", place.formatted_address);
+    });
+  });
+</script>
+{% endblock %}
 
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet"/>
@@ -227,3 +282,4 @@
   }
 </style>
 {% endblock %}
+
