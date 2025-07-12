@@ -79,3 +79,7 @@ footer {
   box-shadow: 0 0 20px #ff69b4;
   background: linear-gradient(45deg, #ff69b4, #ff1493);
 }
+
+.form-check {
+  margin-bottom: 1rem;
+}

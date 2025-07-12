@@ -7,6 +7,12 @@
 <form class="form-with-validation" method="post" action="{% url 'users:login' %}">
   {% csrf_token %}
 
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger text-center mb-3">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+
   <div class="mb-3">
     {{ form.username.label_tag }}
     {{ form.username }}

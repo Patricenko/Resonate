@@ -11,10 +11,12 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect("users:dashboard")  # use correct namespaced URL here
+            return redirect("/profiles/create/")
     else:
         form = CustomUserCreationForm()
     return render(request, "users/register.html", {"form": form})
+
+
 
 def login_view(request):
     if request.method == "POST":

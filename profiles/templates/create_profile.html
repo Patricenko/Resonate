@@ -1,6 +1,45 @@
-<h2>Create Your Dinter Profile</h2>
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Create Profile</button>
-</form>
+{% extends "base.html" %}
+{% load form_tags %}
+{% block title %}Create Profile - Dinter{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="form-with-validation">
+      <h2 class="mb-4 text-center">Create Your Dinter Profile</h2>
+      <form method="POST" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="mb-3 form-check">
+            {% if field.name == 'is_public' %}
+                {{ field|add_class:"form-check-input ms-2" }}
+              <label for="{{ field.id_for_label }}" class="form-check-label">{{ field.label }}</label>
+            {% else %}
+              {{ field.label_tag }}
+              {{ field|add_class:"form-control" }}
+            {% endif %}
+            {% if field.errors %}
+              <div class="text-danger small mt-1">
+                {% for error in field.errors %}
+                  {{ error }}<br />
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+        <button type="submit" class="form-submit mt-3">Create Profile</button>
+      </form>
+    </div>
+  </div>
+
+  {# Optional Preview Section (disabled live update) #}
+  <div class="col-md-4 d-none d-md-block">
+    <div class="p-4 bg-dark rounded shadow" style="min-height: 450px;">
+      <h4 class="text-pink mb-3">Profile Preview</h4>
+      <p><strong>Username:</strong> {{ user.username }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <p><em>Preview updates after form submission.</em></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
