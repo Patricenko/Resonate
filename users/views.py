@@ -8,7 +8,6 @@ def register_view(request):
         form = UserCreationForm(request.POST) 
         if form.is_valid(): 
             login(request, form.save())
-            return redirect("posts:list")
     else:
         form = UserCreationForm()
     return render(request, "users/register.html", { "form": form })
@@ -20,8 +19,6 @@ def login_view(request):
             login(request, form.get_user())
             if 'next' in request.POST:
                 return redirect(request.POST.get('next'))
-            else:
-                return redirect("posts:list")
     else: 
         form = AuthenticationForm()
     return render(request, "users/login.html", { "form": form })
