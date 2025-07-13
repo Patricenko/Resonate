@@ -6,12 +6,14 @@
   <title>{% block title %}Dinter{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <!-- Favicon -->
+  <link rel="icon" href="{% static 'images/logo-icon3.png' %}" type="image/x-icon" />
+
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-
   <!-- Your custom CSS -->
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
   
@@ -41,16 +43,57 @@
       background: #ff69b4;
       color: white;
     }
+
+    /* New style for interest bubbles */
+    .interest-bubble {
+      display: inline-block;
+      margin: 0 0.25rem 0.25rem 0;
+      padding: 0.3rem 0.7rem;
+      border-radius: 1rem;
+      background: rgba(255,105,180,0.15);
+      border: 1.5px solid #ff69b4;
+      color: #ff69b4;
+      font-size: 0.875rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* Profile popup header relative positioning for close button */
+    #profile-popup-header {
+      position: relative;
+      background: linear-gradient(135deg, #ff69b4, #ff1493);
+      border-radius: 1rem 1rem 0 0;
+      padding: 2.5rem 3rem 2rem 1rem; /* top padding bigger for button space, right padding more */
+      text-align: center;
+      color: white;
+    }
+
+    /* Close button positioned top-right inside header */
+    #profile-popup-close-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 1rem;
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+    #profile-popup-close-btn:hover {
+      color: #ffdddd;
+    }
   </style>
 
   {% block extra_css %}{% endblock %}
   {% block head %}{% endblock %}
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg px-4" style="background-color: #090909; border-bottom: 2px solid #ff69b4;">
+  <nav class="navbar navbar-expand-lg px-4" style="background-color: #2b0e2b; border-bottom: 2px solid #ff69b4;">
     <div class="container-fluid d-flex justify-content-between align-items-center">
       <a class="navbar-brand d-flex align-items-center" href="/">
-        <img src="{% static 'images/logo4.png' %}" alt="Resonate Logo" height="40" class="me-2" style="object-fit: contain;">
+        <img src="{% static 'images/resonance2.png' %}" alt="Resonate Logo" height="40" class="me-2" style="object-fit: contain;">
         <span class="text-pink fw-bold d-none d-sm-inline"></span>
       </a>
 
@@ -67,11 +110,8 @@
                 0
               </span>
             </a>
-            <a class="nav-link text-light me-3" href="{% url 'profiles:profile_detail' user.id %}">
-              <i class="fas fa-user"></i> Profile
-            </a>
           </div>
-          
+
           {% if user.profile.profile_photo %}
             <div class="dropdown">
               <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false" role="button" aria-haspopup="true">
@@ -101,233 +141,123 @@
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="text-center py-3" style="background-color: #111; border-top: 2px solid #ff69b4; color: #ddd;">
-    &copy; 2025 NextSteps Hacks - TEAM XXX ⚡
+  <footer class="text-center py-3" style="background-color: #2b0e2b; border-top: 2px solid #ff69b4; color: #ddd;">
+    &copy; 2025 NextSteps Hacks - TEAM Resonant ⚡
   </footer>
 
   <!-- Bootstrap JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  
-  <!-- Match Notification System -->
+
   {% if user.is_authenticated %}
   <script>
-    // Check for new matches and update badge
-    function updateNewMatchesBadge() {
-      fetch('{% url "matching:new_matches_count" %}')
-        .then(response => response.json())
-        .then(data => {
-          const badge = document.getElementById('match-notification-badge');
-          if (data.new_matches_count > 0) {
-            badge.textContent = data.new_matches_count;
-            badge.style.display = 'inline-block';
-          } else {
-            badge.style.display = 'none';
-          }
-        })
-        .catch(error => console.error('Error updating matches badge:', error));
-    }
-
-    // Show match popup
-    function showMatchPopup(matchData) {
-      // Create popup HTML
-      const popupHtml = `
-        <div id="match-popup" class="position-fixed top-50 start-50 translate-middle bg-dark text-white rounded-4 p-4 shadow-lg" style="z-index: 1050; max-width: 400px; width: 90%; border: 2px solid #ff69b4;">
-          <div class="text-center">
-            <div class="mb-3">
-              <i class="fas fa-heart text-danger fa-3x"></i>
-            </div>
-            <h3 class="text-pink mb-3">It's a Match! 🎉</h3>
-            <div class="mb-3">
-              ${matchData.other_user.profile_photo ? 
-                `<img src="${matchData.other_user.profile_photo}" alt="Profile" class="rounded-circle mb-2" width="100" height="100" style="object-fit: cover;">` : 
-                `<div class="rounded-circle bg-secondary mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 100px; height: 100px;"><i class="fas fa-user fa-3x text-light"></i></div>`
-              }
-              <h5 class="mb-1">${matchData.other_user.name}</h5>
-              <p class="text-muted">${matchData.other_user.age} years old</p>
-            </div>
-            <div class="d-flex gap-2 justify-content-center">
-              <button class="btn btn-outline-light" onclick="closeMatchPopup()">
-                <i class="fas fa-times"></i> Close
-              </button>
-              <a href="{% url 'matching:matches' %}" class="btn btn-pink">
-                <i class="fas fa-comment"></i> Say Hi!
-              </a>
-            </div>
-          </div>
-        </div>
-        <div id="match-popup-backdrop" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75" style="z-index: 1040;" onclick="closeMatchPopup()"></div>
-      `;
-      
-      // Add popup to body
-      document.body.insertAdjacentHTML('beforeend', popupHtml);
-      
-      // Mark match as seen after showing
-      fetch('{% url "matching:mark_match_seen" %}', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-        },
-        body: JSON.stringify({
-          match_id: matchData.match_id
-        })
-      });
-    }
-
-    // Close match popup
-    function closeMatchPopup() {
-      const popup = document.getElementById('match-popup');
-      const backdrop = document.getElementById('match-popup-backdrop');
-      if (popup) popup.remove();
-      if (backdrop) backdrop.remove();
-      
-      // Update badge after closing popup
-      updateNewMatchesBadge();
-    }
-
-    // Check for latest match on page load (for showing popup)
-    function checkForLatestMatch() {
-      fetch('{% url "matching:latest_match" %}')
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            showMatchPopup(data);
-          }
-        })
-        .catch(error => console.error('Error checking for latest match:', error));
-    }
-
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', function() {
-      updateNewMatchesBadge();
-      
-      // Only check for latest match on certain pages to avoid spam
-      const currentPath = window.location.pathname;
-      if (currentPath.includes('/matching/') || currentPath === '/') {
-        checkForLatestMatch();
-      }
-      
-      // Update badge every 30 seconds
-      setInterval(updateNewMatchesBadge, 30000);
-    });
-
-    // Global function to show match popup (called from AJAX responses)
-    window.showMatchNotification = function(matchData) {
-      showMatchPopup(matchData);
-      updateNewMatchesBadge();
-    };
-
-    // Profile Popup System
+    // Profile Popup System (modernized)
     function showProfilePopup(profileId) {
       fetch(`/matching/api/profile/${profileId}/`)
         .then(response => response.json())
         .then(data => {
-          if (data.success) {
-            const profile = data.profile;
-            
-            // Create profile popup HTML
-            const profilePopupHtml = `
-              <div id="profile-popup" class="position-fixed top-50 start-50 translate-middle bg-white rounded-4 shadow-lg" style="z-index: 1050; max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto;">
-                <div class="position-relative">
-                  <!-- Close Button -->
-                  <button class="btn-close position-absolute top-0 end-0 m-3" style="z-index: 10;" onclick="closeProfilePopup()"></button>
-                  
-                  <!-- Profile Header -->
-                  <div class="text-center p-4 bg-gradient" style="background: linear-gradient(135deg, #ff69b4, #ff1493); border-radius: 1rem 1rem 0 0;">
-                    <div class="profile-photo-container mb-3">
-                      ${profile.profile_photo ? 
-                        `<img src="${profile.profile_photo}" alt="Profile" class="rounded-circle border border-4 border-white" width="120" height="120" style="object-fit: cover;">` : 
-                        `<div class="rounded-circle bg-light mx-auto d-flex align-items-center justify-content-center border border-4 border-white" style="width: 120px; height: 120px;"><i class="fas fa-user fa-3x text-muted"></i></div>`
-                      }
+          if (!data.success) {
+            alert('Error loading profile: ' + data.error);
+            return;
+          }
+          const profile = data.profile;
+
+          const interestsHtml = profile.interests ? profile.interests.split(',')
+            .map(i => `<span class="interest-bubble">${i.trim()}</span>`).join('') : '';
+
+          const profilePhotoHtml = profile.profile_photo
+            ? `<img src="${profile.profile_photo}" alt="Profile photo" class="rounded-circle border border-4 border-white shadow-sm" width="130" height="130" style="object-fit: cover;">`
+            : `<div class="rounded-circle bg-secondary border border-4 border-white d-flex justify-content-center align-items-center" style="width: 130px; height: 130px;">
+                 <i class="fas fa-user fa-3x text-light"></i>
+               </div>`;
+
+          const bioHtml = profile.bio ? `<p class="mb-4">${profile.bio}</p>` : '';
+
+          const audioHtml = profile.audio_bio ? `
+            <div class="mb-4">
+              <h6 class="text-muted"><i class="fas fa-microphone me-2"></i>Voice Message</h6>
+              <audio id="profile-audio-bio" controls class="w-100" preload="none" src="${profile.audio_bio}"></audio>
+            </div>` : '';
+
+          let actionsHtml = '';
+          if (profile.is_match) {
+            actionsHtml = `
+              <button class="btn btn-success w-100">
+                <i class="fas fa-comment me-2"></i>Message
+              </button>`;
+          } else if (!profile.has_liked && !profile.has_passed) {
+            actionsHtml = `
+              <button class="btn btn-outline-danger me-2 flex-grow-1" onclick="passProfileFromPopup(${profile.id})">
+                <i class="fas fa-times me-1"></i> Pass
+              </button>
+              <button class="btn btn-pink flex-grow-1" onclick="likeProfileFromPopup(${profile.id})">
+                <i class="fas fa-heart me-1"></i> Like
+              </button>`;
+          } else if (profile.has_liked) {
+            actionsHtml = `
+              <div class="text-center text-success fw-semibold">
+                <i class="fas fa-heart me-1"></i>You liked this profile
+              </div>`;
+          } else {
+            actionsHtml = `
+              <div class="text-center text-muted fw-semibold">
+                <i class="fas fa-times me-1"></i>You passed on this profile
+              </div>`;
+          }
+
+          const profilePopupHtml = `
+            <div id="profile-popup" class="position-fixed top-50 start-50 translate-middle bg-dark rounded-4 shadow-lg" style="z-index: 1050; max-width: 520px; width: 95%; max-height: 90vh; overflow-y: auto; color: #f1f1f1;">
+              <div class="p-4">
+                <!-- Header with pink gradient and relative positioning -->
+                <div id="profile-popup-header">
+                  ${profilePhotoHtml}
+                  <h3 class="mt-3 mb-1">${profile.name}</h3>
+                  <p class="mb-0">${profile.age} years old • ${profile.gender}</p>
+                  <button id="profile-popup-close-btn" aria-label="Close" onclick="closeProfilePopup()">&times;</button>
+                </div>
+
+                <!-- Details below header -->
+                <div class="px-2 mt-4">
+                  <div class="row text-center mb-4">
+                    <div class="col-6">
+                      <div class="p-3 bg-secondary bg-opacity-25 rounded">
+                        <i class="fas fa-map-marker-alt text-pink mb-2"></i>
+                        <div class="small text-pink fw-semibold">Location</div>
+                        <div>${profile.location || 'Not specified'}</div>
+                      </div>
                     </div>
-                    <h3 class="text-white mb-1">${profile.name}</h3>
-                    <p class="text-white opacity-75 mb-0">${profile.age} years old • ${profile.gender}</p>
+                    <div class="col-6">
+                      <div class="p-3 bg-secondary bg-opacity-25 rounded">
+                        <i class="fas fa-ruler-vertical text-pink mb-2"></i>
+                        <div class="small text-pink fw-semibold">Height</div>
+                        <div>${profile.height ? profile.height + ' cm' : 'Not specified'}</div>
+                      </div>
+                    </div>
                   </div>
-                  
-                  <!-- Profile Details -->
-                  <div class="p-4">
-                    <div class="row g-3 mb-4">
-                      <div class="col-6">
-                        <div class="text-center p-3 bg-light rounded">
-                          <i class="fas fa-map-marker-alt text-primary mb-2"></i>
-                          <div class="small text-muted">Location</div>
-                          <div class="fw-bold">${profile.location || 'Not specified'}</div>
-                        </div>
-                      </div>
-                      <div class="col-6">
-                        <div class="text-center p-3 bg-light rounded">
-                          <i class="fas fa-ruler-vertical text-primary mb-2"></i>
-                          <div class="small text-muted">Height</div>
-                          <div class="fw-bold">${profile.height ? profile.height + ' cm' : 'Not specified'}</div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    ${profile.bio ? `
-                      <div class="mb-4">
-                        <h6 class="text-muted mb-2"><i class="fas fa-quote-left me-2"></i>About</h6>
-                        <p class="mb-0">${profile.bio}</p>
-                      </div>
-                    ` : ''}
-                    
-                    ${profile.interests ? `
-                      <div class="mb-4">
-                        <h6 class="text-muted mb-2"><i class="fas fa-heart me-2"></i>Interests</h6>
-                        <div class="badge-container">
-                          ${profile.interests.split(',').map(interest => 
-                            `<span class="badge bg-secondary me-1 mb-1">${interest.trim()}</span>`
-                          ).join('')}
-                        </div>
-                      </div>
-                    ` : ''}
-                    
-                    ${profile.audio_bio ? `
-                      <div class="mb-4">
-                        <h6 class="text-muted mb-2"><i class="fas fa-microphone me-2"></i>Voice Message</h6>
-                        <audio controls class="w-100">
-                          <source src="${profile.audio_bio}" type="audio/mpeg">
-                          Your browser does not support the audio element.
-                        </audio>
-                      </div>
-                    ` : ''}
-                    
-                    <!-- Action Buttons -->
-                    <div class="d-flex gap-2 justify-content-center">
-                      ${profile.is_match ? `
-                        <button class="btn btn-success flex-fill">
-                          <i class="fas fa-comment"></i> Message
-                        </button>
-                      ` : `
-                        ${!profile.has_liked && !profile.has_passed ? `
-                          <button class="btn btn-outline-danger" onclick="passProfileFromPopup(${profile.id})">
-                            <i class="fas fa-times"></i> Pass
-                          </button>
-                          <button class="btn btn-pink flex-fill" onclick="likeProfileFromPopup(${profile.id})">
-                            <i class="fas fa-heart"></i> Like
-                          </button>
-                        ` : `
-                          ${profile.has_liked ? `
-                            <div class="text-center text-success">
-                              <i class="fas fa-heart"></i> You liked this profile
-                            </div>
-                          ` : `
-                            <div class="text-center text-muted">
-                              <i class="fas fa-times"></i> You passed on this profile
-                            </div>
-                          `}
-                        `}
-                      `}
-                    </div>
+
+                  ${bioHtml}
+
+                  ${profile.interests ? `<h6 class="text-pink mb-2"><i class="fas fa-heart me-2"></i>Interests</h6><div>${interestsHtml}</div>` : ''}
+
+                  ${audioHtml}
+
+                  <div class="d-flex gap-2 mt-4">
+                    ${actionsHtml}
                   </div>
                 </div>
               </div>
-              <div id="profile-popup-backdrop" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50" style="z-index: 1040;" onclick="closeProfilePopup()"></div>
-            `;
-            
-            // Add popup to body
-            document.body.insertAdjacentHTML('beforeend', profilePopupHtml);
-          } else {
-            alert('Error loading profile: ' + data.error);
+            </div>
+            <div id="profile-popup-backdrop" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75" style="z-index: 1040;" onclick="closeProfilePopup()"></div>
+          `;
+
+          closeProfilePopup();
+          document.body.insertAdjacentHTML('beforeend', profilePopupHtml);
+
+          // Play audio automatically after popup shown
+          const audioElem = document.getElementById('profile-audio-bio');
+          if (audioElem) {
+            audioElem.play().catch(() => {
+              // Autoplay might be blocked by browser, so we catch error silently
+            });
           }
         })
         .catch(error => {
@@ -336,7 +266,6 @@
         });
     }
 
-    // Close profile popup
     function closeProfilePopup() {
       const popup = document.getElementById('profile-popup');
       const backdrop = document.getElementById('profile-popup-backdrop');
@@ -344,7 +273,6 @@
       if (backdrop) backdrop.remove();
     }
 
-    // Like profile from popup
     function likeProfileFromPopup(profileId) {
       fetch('{% url "matching:like_profile" %}', {
         method: 'POST',
@@ -352,11 +280,9 @@
           'Content-Type': 'application/json',
           'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
         },
-        body: JSON.stringify({
-          'profile_id': profileId
-        })
+        body: JSON.stringify({'profile_id': profileId})
       })
-      .then(response => response.json())
+      .then(res => res.json())
       .then(data => {
         if (data.success) {
           closeProfilePopup();
@@ -364,7 +290,6 @@
             showMatchPopup(data.match_data);
           }
           updateNewMatchesBadge();
-          // Refresh page if on matching page
           if (window.location.pathname.includes('/matching/')) {
             setTimeout(() => window.location.reload(), 1000);
           }
@@ -372,13 +297,9 @@
           alert('Error: ' + data.error);
         }
       })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again.');
-      });
+      .catch(() => alert('An error occurred. Please try again.'));
     }
 
-    // Pass profile from popup
     function passProfileFromPopup(profileId) {
       fetch('{% url "matching:pass_profile" %}', {
         method: 'POST',
@@ -386,15 +307,12 @@
           'Content-Type': 'application/json',
           'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
         },
-        body: JSON.stringify({
-          'profile_id': profileId
-        })
+        body: JSON.stringify({'profile_id': profileId})
       })
-      .then(response => response.json())
+      .then(res => res.json())
       .then(data => {
         if (data.success) {
           closeProfilePopup();
-          // Refresh page if on matching page
           if (window.location.pathname.includes('/matching/')) {
             setTimeout(() => window.location.reload(), 1000);
           }
@@ -402,13 +320,24 @@
           alert('Error: ' + data.error);
         }
       })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again.');
-      });
+      .catch(() => alert('An error occurred. Please try again.'));
     }
 
-    // Make showProfilePopup globally available
+    // Play audio on spacebar press if popup is open
+    document.addEventListener('keydown', function(event) {
+      if (event.code === 'Space' || event.key === ' ') {
+        const audioElem = document.getElementById('profile-audio-bio');
+        if (audioElem) {
+          if (audioElem.paused) {
+            audioElem.play().catch(() => {});
+          } else {
+            audioElem.pause();
+          }
+          event.preventDefault();
+        }
+      }
+    });
+
     window.showProfilePopup = showProfilePopup;
   </script>
   {% endif %}

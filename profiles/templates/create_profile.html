@@ -10,8 +10,10 @@
       {% csrf_token %}
       <div class="row g-3">
         {% for field in form %}
-          {% if field.name == 'is_public' %}
-            {# Skip is_public completely #}
+          {% if field.name == 'user' %}
+            <input type="hidden" name="user" value="{{ request.user.id }}">
+          {% elif field.name == 'is_public' %}
+            {# skip #}
           {% elif field.name == 'interests' %}
             <div class="col-12">
               <label class="form-label">Interests</label>
@@ -26,39 +28,11 @@
                   </button>
                 {% endfor %}
               </div>
-              <input type="hidden" name="{{ field.name }}" id="id_interests" value="{{ field.value|join:',' }}">
+              <input type="hidden" name="{{ field.name }}" id="id_interests" value="{{ field.value }}">
               {% if field.errors %}
                 <div class="text-danger small mt-1">
-                  {% for error in field.errors %}
-                    {{ error }}<br>
-                  {% endfor %}
+                  {% for error in field.errors %}{{ error }}<br>{% endfor %}
                 </div>
-
-                {% if field.errors %}
-                  <div class="text-danger small mt-1">
-                    {% for error in field.errors %}
-                      {{ error }}<br>
-                    {% endfor %}
-                  </div>
-                {% endif %}
-              {% else %}
-                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-
-                {# Apply Autocomplete only to 'location' field #}
-                {% if field.name == 'location' %}
-                  {{ field|add_class:"form-control" }}
-                {% else %}
-                  {{ field|add_class:"form-control" }}
-                {% endif %}
-
-                {% if field.errors %}
-                  <div class="text-danger small mt-1">
-                    {% for error in field.errors %}
-                      {{ error }}<br>
-                    {% endfor %}
-                  </div>
-                {% endif %}
-
               {% endif %}
             </div>
           {% elif field.name == 'profile_photo' %}
@@ -67,9 +41,7 @@
               {{ field|add_class:"form-control" }}
               {% if field.errors %}
                 <div class="text-danger small mt-1">
-                  {% for error in field.errors %}
-                    {{ error }}<br>
-                  {% endfor %}
+                  {% for error in field.errors %}{{ error }}<br>{% endfor %}
                 </div>
               {% endif %}
             </div>
@@ -79,9 +51,7 @@
               {{ field|add_class:"form-control" }}
               {% if field.errors %}
                 <div class="text-danger small mt-1">
-                  {% for error in field.errors %}
-                    {{ error }}<br>
-                  {% endfor %}
+                  {% for error in field.errors %}{{ error }}<br>{% endfor %}
                 </div>
               {% endif %}
             </div>
@@ -91,16 +61,13 @@
               {{ field|add_class:"form-control" }}
               {% if field.errors %}
                 <div class="text-danger small mt-1">
-                  {% for error in field.errors %}
-                    {{ error }}<br>
-                  {% endfor %}
+                  {% for error in field.errors %}{{ error }}<br>{% endfor %}
                 </div>
               {% endif %}
             </div>
           {% endif %}
         {% endfor %}
       </div>
-
       <button type="submit" class="form-submit mt-4 w-100">Create Profile</button>
     </form>
   </div>
@@ -122,72 +89,39 @@
   </div>
 </div>
 
-<!-- Google Maps JavaScript API with Places -->
-<script src="https://maps.googleapis.com/maps/api/js?key={{GOOGLE_API_KEY}}&libraries=places" defer></script>
-
-<!-- Load the new Place Autocomplete Web Component -->
-<script type="module" src="https://unpkg.com/@googlemaps/places-autocomplete-element"></script>
-
-<script>
-  window.addEventListener('load', function () {
-    const input = document.getElementById('id_location');
-    if (!input) return;
-
-    const autocomplete = new google.maps.places.Autocomplete(input, {
-      types: ['geocode'],  // or ['address']
-      componentRestrictions: { country: ['sk', 'cz'] } // ak chceš obmedziť
-    });
-
-    autocomplete.addListener('place_changed', function () {
-      const place = autocomplete.getPlace();
-      if (!place.geometry) {
-        console.log("No geometry found for place:", place);
-        return;
-      }
-      // V prípade potreby: napr. ulož aj latitude/longitude
-      console.log("Selected place:", place.formatted_address);
-    });
-  });
-</script>
-{% endblock %}
-
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet"/>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    // Interests toggle buttons
+    // INTEREST BUTTONS
     const buttons = document.querySelectorAll(".interest-button");
     const hiddenInput = document.getElementById("id_interests");
-    let selected = hiddenInput.value ? hiddenInput.value.split(",") : [];
+    let selected = hiddenInput?.value ? hiddenInput.value.split(",").map(i => i.trim().toLowerCase()) : [];
 
     buttons.forEach(btn => {
-      if (selected.includes(btn.dataset.interest)) {
+      const val = btn.dataset.interest;
+      if (selected.includes(val)) {
         btn.classList.add("selected", "btn-pink");
         btn.classList.remove("btn-outline-pink");
-      } else {
-        btn.classList.add("btn-outline-pink");
-        btn.classList.remove("btn-pink");
       }
-    });
 
-    buttons.forEach(button => {
-      button.addEventListener("click", () => {
-        const interest = button.dataset.interest;
-        if (selected.includes(interest)) {
-          selected = selected.filter(i => i !== interest);
-          button.classList.remove("selected", "btn-pink");
-          button.classList.add("btn-outline-pink");
+      btn.addEventListener("click", () => {
+        if (selected.includes(val)) {
+          selected = selected.filter(i => i !== val);
+          btn.classList.remove("selected", "btn-pink");
+          btn.classList.add("btn-outline-pink");
         } else {
-          selected.push(interest);
-          button.classList.add("selected", "btn-pink");
-          button.classList.remove("btn-outline-pink");
+          selected.push(val);
+          btn.classList.add("selected", "btn-pink");
+          btn.classList.remove("btn-outline-pink");
         }
         hiddenInput.value = selected.join(",");
       });
     });
 
-    // Cropper logic
+    // CROPPER LOGIC
     const inputFile = document.querySelector('input[type="file"][name="profile_photo"]');
     const cropperModal = document.getElementById("cropper-modal");
     const cropperImage = document.getElementById("cropper-image");
@@ -197,7 +131,7 @@
 
     cropperModal.style.display = "none";
 
-    inputFile.addEventListener("change", function () {
+    inputFile?.addEventListener("change", function () {
       const file = this.files[0];
       if (!file) {
         cropperModal.style.display = "none";
@@ -207,7 +141,6 @@
       cropperImage.src = url;
 
       cropperModal.style.display = "flex";
-
       if (cropper) cropper.destroy();
 
       cropper = new Cropper(cropperImage, {
@@ -239,16 +172,39 @@
         height: 400,
         imageSmoothingQuality: 'high'
       }).toBlob(blob => {
-        const fileInput = inputFile;
         const dataTransfer = new DataTransfer();
         const newFile = new File([blob], "cropped_profile_photo.png", { type: "image/png" });
         dataTransfer.items.add(newFile);
-        fileInput.files = dataTransfer.files;
+        inputFile.files = dataTransfer.files;
 
         cropperModal.style.display = "none";
         cropper.destroy();
         cropper = null;
       }, "image/png");
+    });
+  });
+</script>
+
+<!-- Google Maps JavaScript API with Places -->
+<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_API_KEY }}&libraries=places" defer></script>
+<script type="module" src="https://unpkg.com/@googlemaps/places-autocomplete-element"></script>
+<script>
+  window.addEventListener('load', function () {
+    const input = document.getElementById('id_location');
+    if (!input) return;
+
+    const autocomplete = new google.maps.places.Autocomplete(input, {
+      types: ['geocode'],
+      componentRestrictions: { country: ['sk', 'cz'] }
+    });
+
+    autocomplete.addListener('place_changed', function () {
+      const place = autocomplete.getPlace();
+      if (!place.geometry) {
+        console.log("No geometry found for place:", place);
+        return;
+      }
+      console.log("Selected place:", place.formatted_address);
     });
   });
 </script>
@@ -282,4 +238,3 @@
   }
 </style>
 {% endblock %}
-
