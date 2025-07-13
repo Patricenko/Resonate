@@ -12,12 +12,12 @@ import json
 def match_view(request):
     """Main matching interface - show potential matches"""
     current_user = request.user
-    
+
     # Get users that current user has already liked or passed on
     liked_users = Like.objects.filter(liker=current_user).values_list('liked', flat=True)
     passed_users = Pass.objects.filter(passer=current_user).values_list('passed', flat=True)
     interacted_users = list(liked_users) + list(passed_users)
-    
+
     # Get current user's preferences
     try:
         current_profile = Profile.objects.get(user=current_user)
@@ -27,7 +27,7 @@ def match_view(request):
     except Profile.DoesNotExist:
         # If user doesn't have a profile, redirect to create one
         return redirect('profiles:create_profile')
-    
+
     # Build filter query for potential matches
     potential_matches = Profile.objects.filter(
         is_public=True,
@@ -38,20 +38,28 @@ def match_view(request):
     ).exclude(
         user__in=interacted_users
     )
-    
+
     # Filter by preferred gender if specified
-    if preferred_gender != 'B' and preferred_gender != 'O':
+    if preferred_gender not in ['B', 'O']:  # Assuming B=both, O=other
         potential_matches = potential_matches.filter(gender=preferred_gender)
-    
+
     # Get the first potential match
     next_profile = potential_matches.first()
-    
+
+    # Prepare interests list safely
+    interests_list = []
+    if next_profile and next_profile.interests:
+        interests_list = [interest.strip() for interest in next_profile.interests.split(",") if interest.strip()]
+
     context = {
         'profile': next_profile,
-        'has_more_profiles': potential_matches.count() > 1
+        'interests_list': interests_list,
+        'has_more_profiles': potential_matches.count() > 1,
     }
-    
+
     return render(request, 'match.html', context)
+
+
 
 
 @login_required

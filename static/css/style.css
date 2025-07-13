@@ -15,8 +15,9 @@ body > main {
 
 /* Navbar */
 nav.navbar {
-  background-color: #111;
+  background-color: #2b0e2b;
   border-bottom: 2px solid #ff69b4;
+  border-radius: 0 0 15px 15px; /* round bottom corners */
 }
 
 .navbar-brand {
@@ -40,12 +41,13 @@ a:hover, a:focus {
 
 /* Footer */
 footer {
-  background-color: #111;
+  background-color: #2b0e2b;
   border-top: 2px solid #ff69b4;
   color: #ddd;
   text-align: center;
   padding: 1rem;
   font-size: 0.9rem;
+  border-radius: 15px 15px 0 0; /* round top corners */
 }
 
 /* Forms */
@@ -222,91 +224,7 @@ footer {
   margin-top: 0.25rem;
 }
 
-.interest-button {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  border-radius: 25px;
-  border: 2px solid #ff69b4;
-  color: #ff69b4;
-  background-color: transparent;
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.3s, color 0.3s;
-  margin: 0.2rem;
-}
-
-.interest-button:hover:not(.selected):not(:active) {
-  background-color: #ff69b4;
-  color: white;
-}
-
-.interest-button.selected {
-  background-color: #ff69b4;
-  color: white;
-  border-color: #ff69b4;
-}
-
-.interest-button:active {
-  background-color: transparent;
-  color: #ff69b4;
-}
-
-/* ==== Fullscreen Profile Page Layout ==== */
-.profile-fullscreen {
-  display: flex;
-  margin-left: 0;
-  padding: 0;
-  overflow: hidden;
-  border-radius: 20px;
-  box-shadow: 0 0 20px #282224;
-}
-
-.profile-photo {
-  flex: 0.9;
-  background-size: cover;
-  background-repeat: no-repeat;
-}
-
-.profile-info {
-  flex: 1;
-  padding: 3rem;
-  background-color: #1a1a1a;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.profile-info h1 {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.profile-info .subtext {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.profile-details-list {
-  list-style: none;
-  padding: 0;
-  margin-top: 1rem;
-}
-
-.profile-details-list li {
-  margin-bottom: 0.5rem;
-}
-
-.looking-for {
-  margin-top: 1rem;
-}
-
-.audio-bio {
-  margin-top: 1.5rem;
-  width: 100%;
-  max-height: 40px;
-}
-
+/* Interest bubbles - updated to be more rounded and larger padding */
 .interest-bubbles {
   display: flex;
   flex-wrap: wrap;
@@ -317,14 +235,15 @@ footer {
 .interest-bubble {
   background-color: transparent;
   border: 2px solid #ff69b4;
-  border-radius: 25px;
+  border-radius: 9999px; /* fully pill-shaped */
   color: #ff69b4;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.9rem;
+  padding: 0.5rem 1.2rem; /* bigger padding for nicer bubble shape */
+  font-size: 1rem;
   user-select: none;
   cursor: default;
 }
 
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .profile-fullscreen {
     flex-direction: column;
@@ -341,7 +260,32 @@ footer {
   }
 
   .interest-bubble {
-    font-size: 0.8rem;
-    padding: 0.3rem 0.8rem;
+    padding: 0.4rem 1rem;
+    font-size: 0.9rem;
   }
+}
+
+/* Close button inside popup: keep it fully visible and inside the popup */
+#profile-popup .btn-close {
+  position: absolute;
+  top: 1rem !important;
+  right: 1rem !important;
+  z-index: 1100;
+  box-shadow: 0 0 8px rgba(0,0,0,0.7);
+  background-color: #ff69b4;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  opacity: 1;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#profile-popup .btn-close:hover {
+  background-color: #ff1493;
+}
+
+.border-pink {
+  border-color: #ff69b4 !important; /* pink */
+  color: #ff69b4 !important;        /* pink text */
 }

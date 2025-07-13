@@ -2,68 +2,99 @@
 {% block title %}{{ profile.name }} - Profile | Dinter{% endblock %}
 
 {% block content %}
-<div class="profile-fullscreen">
+    <style>
+  .border-pink {
+    border-color: #ff69b4 !important;
+    color: #ff69b4 !important;
+  }
+</style>
 
-  <!-- Left: Profile Photo -->
-  <div class="profile-photo"
-       style="
-         background-image: url('{% if profile.profile_photo %}{{ profile.profile_photo.url }}{% else %}/static/images/default-avatar.jpg{% endif %}');
-         background-position: center;
-         background-size: cover;
-         aspect-ratio: 1 / 1;
-       ">
-  </div>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="bg-dark rounded-4 shadow-lg p-4 p-md-5">
+        <div class="row g-5 align-items-start">
 
-  <!-- Right: Profile Info -->
-  <div class="profile-info">
-    <h1 class="text-pink">{{ profile.name }}</h1>
+          <!-- Left: Profile Photo -->
+          <div class="col-md-5 text-center">
+            <div class="rounded-4 shadow overflow-hidden mx-auto" style="width: 100%; max-width: 450px; aspect-ratio: 1/1; background: url('{% if profile.profile_photo %}{{ profile.profile_photo.url }}{% else %}/static/images/default-avatar.jpg{% endif %}') center / cover no-repeat;"></div>
+          </div>
 
-    {% if profile.bio %}
-      <p class="subtext">{{ profile.bio }}</p>
-    {% endif %}
+          <!-- Right: Profile Info -->
+          <div class="col-md-7">
+            <h1 class="text-pink display-5 fw-bold mb-3">{{ profile.name }}, {{ profile.age }}</h1>
 
-    <ul class="profile-details-list">
-      <li><strong>Username:</strong> {{ profile.user.username }}</li>
-      <li><strong>Gender:</strong> {{ profile.get_gender_display }}</li>
-      <li><strong>Age:</strong> {{ profile.age }}</li>
-      <li><strong>Height:</strong> {{ profile.height }} cm</li>
-      <li><strong>Location:</strong> {{ profile.location }}</li>
-      <li><strong>Preferred Gender:</strong> {{ profile.get_preferred_gender_display }}</li>
-      <li><strong>Preferred Age Range:</strong> {{ profile.preferred_age_min }}–{{ profile.preferred_age_max }}</li>
-      <li><strong>Public Profile:</strong> {{ profile.is_public|yesno:"Yes,No" }}</li>
-    </ul>
+            {% if profile.bio %}
+              <p class="fst-italic text-muted">{{ profile.bio }}</p>
+            {% endif %}
 
-    {% if interests_list %}
-      <div class="mt-4">
-        <strong>Interests:</strong>
-        <div class="interest-bubbles mt-2">
-          {% for interest in interests_list %}
-            <span class="interest-bubble">{{ interest }}</span>
-          {% endfor %}
+            <ul class="list-unstyled mt-3 mb-4" style="max-width: 450px;">
+              <li class="mb-1 d-flex align-items-center">
+                <i class="fas fa-user text-pink me-2" style="min-width: 20px;"></i>
+                <strong class="me-1">Username:</strong> {{ profile.user.username }}
+              </li>
+              <li class="mb-1 d-flex align-items-center">
+                <i class="fas fa-venus-mars text-pink me-2" style="min-width: 20px;"></i>
+                <strong class="me-1">Gender:</strong> {{ profile.get_gender_display }}
+              </li>
+              <li class="mb-1 d-flex align-items-center">
+                <i class="fas fa-ruler-vertical text-pink me-2" style="min-width: 20px;"></i>
+                <strong class="me-1">Height:</strong> {{ profile.height }} cm
+              </li>
+              <li class="mb-1 d-flex align-items-center">
+                <i class="fas fa-map-marker-alt text-pink me-2" style="min-width: 20px;"></i>
+                <strong class="me-1">Location:</strong> {{ profile.location }}
+              </li>
+              <li class="mb-1 d-flex align-items-center">
+                <i class="fas fa-heart text-pink me-2" style="min-width: 20px;"></i>
+                <strong class="me-1">Preferred Gender:</strong> {{ profile.get_preferred_gender_display }}
+              </li>
+              <li class="mb-1 d-flex align-items-center">
+                <i class="fas fa-users text-pink me-2" style="min-width: 20px;"></i>
+                <strong class="me-1">Preferred Age Range:</strong> {{ profile.preferred_age_min }}–{{ profile.preferred_age_max }}
+              </li>
+              <li class="mb-1 d-flex align-items-center">
+                <i class="fas fa-globe text-pink me-2" style="min-width: 20px;"></i>
+                <strong class="me-1">Public Profile:</strong> {{ profile.is_public|yesno:"Yes,No" }}
+              </li>
+            </ul>
+
+            {% if interests_list %}
+              <div class="mb-4">
+                <strong><i class="fas fa-star text-pink me-2"></i>Interests:</strong>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                  {% for interest in interests_list %}
+                    <span class="border border-2 border-pink text-pink rounded-pill px-3 py-2" style="background-color: transparent;">{{ interest }}</span>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+
+            {% if profile.audio_bio %}
+              <div class="mb-4">
+                <strong><i class="fas fa-microphone text-pink me-2"></i>Audio Bio:</strong>
+                <audio controls class="w-100 mt-2">
+                  <source src="{{ profile.audio_bio.url }}" type="audio/mpeg">
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
+            {% endif %}
+
+            {% if profile.social_links %}
+              <div>
+                <strong><i class="fas fa-link text-pink me-2"></i>Social Links:</strong>
+                <ul class="list-unstyled mt-2">
+                  {% for key, value in profile.social_links.items %}
+                    <li class="mb-1"><strong>{{ key|title }}:</strong> <a href="{{ value }}" target="_blank" class="text-pink text-decoration-none">{{ value }}</a></li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+
+          </div>
         </div>
       </div>
-    {% endif %}
-
-    {% if profile.audio_bio %}
-      <div class="audio-bio mt-4">
-        <audio controls>
-          <source src="{{ profile.audio_bio.url }}" type="audio/mpeg">
-          Your browser does not support the audio element.
-        </audio>
-      </div>
-    {% endif %}
-
-    {% if profile.social_links %}
-      <div class="mt-4">
-        <strong>Social Links:</strong>
-        <ul class="profile-details-list">
-          {% for key, value in profile.social_links.items %}
-            <li><strong>{{ key|title }}:</strong> <a href="{{ value }}" target="_blank">{{ value }}</a></li>
-          {% endfor %}
-        </ul>
-      </div>
-    {% endif %}
+    </div>
   </div>
-
 </div>
 {% endblock %}

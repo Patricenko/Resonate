@@ -53,7 +53,7 @@ def create_profile_view(request):
             profile.user = request.user
             profile.is_public = True
             profile.save()
-            return redirect(reverse('profiles:profile_detail', kwargs={'user_id': request.user.id}))
+            return redirect('profiles:profile_me')
     else:
         form = ProfileForm()
 
@@ -88,7 +88,7 @@ def edit_profile_view(request):
             profile.interests = ",".join(interests_list)
             profile.is_public = True
             profile.save()
-            return redirect('profiles:profile_detail', user_id=request.user.id)
+            return redirect('profiles:profile_me')
     else:
         form = ProfileForm(instance=profile)
 
