@@ -1,11 +1,16 @@
 {% extends "base.html" %}
 {% load user_form_tags %}
-{% block title %}Create Profile - Dinter{% endblock %}
+{% block title %}Create Profile - Resonate{% endblock %}
 
 {% block content %}
+<style>
+    body {
+        background: #1a1a1a;
+    }
+</style>
 <div class="container my-5" style="max-width: 900px;">
   <div class="form-with-validation p-4">
-    <h2 class="mb-4 text-center text-pink">Create Your Dinter Profile</h2>
+    <h2 class="mb-4 text-center text-pink">Create Your Resonate Profile</h2>
     <form method="POST" enctype="multipart/form-data" novalidate>
       {% csrf_token %}
       <div class="row g-3">
@@ -28,7 +33,7 @@
                   </button>
                 {% endfor %}
               </div>
-              <input type="hidden" name="{{ field.name }}" id="id_interests" value="{{ field.value }}">
+              <input type="hidden" name="{{ field.name }}" id="id_interests" value="{{ field.value|default_if_none:'' }}">
               {% if field.errors %}
                 <div class="text-danger small mt-1">
                   {% for error in field.errors %}{{ error }}<br>{% endfor %}
@@ -98,7 +103,9 @@
     // INTEREST BUTTONS
     const buttons = document.querySelectorAll(".interest-button");
     const hiddenInput = document.getElementById("id_interests");
-    let selected = hiddenInput?.value ? hiddenInput.value.split(",").map(i => i.trim().toLowerCase()) : [];
+    let selected = hiddenInput?.value
+      ? hiddenInput.value.split(",").map(i => i.trim().toLowerCase()).filter(i => i && i !== 'none')
+      : [];
 
     buttons.forEach(btn => {
       const val = btn.dataset.interest;

@@ -1,11 +1,16 @@
 {% extends "base.html" %}
 {% load user_form_tags %}
-{% block title %}Edit Profile - Dinter{% endblock %}
+{% block title %}Edit Profile - Resonate{% endblock %}
 
 {% block content %}
+<style>
+    body {
+        background: #1a1a1a;
+    }
+</style>
 <div class="container my-5" style="max-width: 900px;">
   <div class="form-with-validation p-4">
-    <h2 class="mb-4 text-center text-pink">Edit Your Dinter Profile</h2>
+    <h2 class="mb-4 text-center text-pink">Edit Your Resonate Profile</h2>
     <form method="POST" enctype="multipart/form-data" novalidate>
       {% csrf_token %}
       <div class="row g-3">

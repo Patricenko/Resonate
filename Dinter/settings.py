@@ -41,7 +41,6 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
 
 LOGIN_URL = "/users/login/"  # or wherever your login view is
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -134,7 +133,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [ BASE_DIR / 'static' ]  # Pre vývoj
 STATIC_ROOT = BASE_DIR / 'staticfiles'      # Pre `collectstatic`
 

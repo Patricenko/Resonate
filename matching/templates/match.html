@@ -23,7 +23,7 @@
   .btn-outline-pink {
     color: #ff69b4;
     border-color: #ff69b4;
-    background-color: #444444;  /* Gray background */
+    background-color: #444444;
   }
   .btn-outline-pink:hover {
     background-color: #ff69b4;
@@ -32,30 +32,68 @@
   .btn-outline-danger {
     color: #dc3545;
     border-color: #dc3545;
-    background-color: #444444;  /* Gray background */
+    background-color: #444444;
   }
   .btn-outline-danger:hover {
     background-color: #dc3545;
     color: white;
   }
+
+  /* Animation classes */
+  @keyframes slideOutLeft {
+    to { transform: translateX(-100%) rotate(-10deg); opacity: 0; }
+  }
+  @keyframes slideOutRight {
+    to { transform: translateX(100%) rotate(10deg); opacity: 0; }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  .animate-in {
+    animation: fadeInUp 0.5s ease-out;
+  }
+  .animate-left {
+    animation: slideOutLeft 0.5s forwards;
+  }
+  .animate-right {
+    animation: slideOutRight 0.5s forwards;
+  }
+  .btn-feedback {
+    animation: pulse 0.4s ease;
+    background-color: #ff69b4 !important;
+    color: white !important;
+    border-color: #ff69b4 !important;
+  }
+  .btn-feedback-danger {
+    animation: pulse 0.4s ease;
+    background-color: #dc3545 !important;
+    color: white !important;
+    border-color: #dc3545 !important;
+  }
 </style>
 
 <div class="container py-5">
   {% if profile %}
-  <div class="bg-dark rounded-4 shadow-lg p-4 p-md-5">
+  <div id="profile-card" class="bg-dark rounded-4 shadow-lg p-4 p-md-5 animate-in">
     <div class="row g-5 align-items-center">
-
       <!-- Left: Profile Photo + Buttons -->
       <div class="col-md-5 text-center position-relative">
         <div class="rounded-4 shadow overflow-hidden mx-auto" style="width: 100%; max-width: 450px; aspect-ratio: 1/1; background: url('{% if profile.profile_photo %}{{ profile.profile_photo.url }}{% else %}/static/images/default-avatar.jpg{% endif %}') center / cover no-repeat;">
         </div>
 
         <div class="d-flex justify-content-center gap-4 mt-4">
-          <button type="button" class="btn btn-outline-danger rounded-circle" style="width: 80px; height: 80px;"
+          <button id="btn-pass" type="button" class="btn btn-outline-danger rounded-circle d-flex justify-content-center align-items-center" style="width: 80px; height: 80px;"
             onclick="passProfile({{ profile.id }});" title="Pass">
             <i class="fas fa-times fa-2x"></i>
           </button>
-          <button type="button" class="btn btn-outline-pink rounded-circle" style="width: 80px; height: 80px;"
+          <button id="btn-like" type="button" class="btn btn-outline-pink rounded-circle d-flex justify-content-center align-items-center" style="width: 80px; height: 80px;"
             onclick="likeProfile({{ profile.id }});" title="Like">
             <i class="fas fa-heart fa-2x"></i>
           </button>
@@ -72,7 +110,7 @@
         </div>
 
         {% if profile.bio %}
-          <p class="fst-italic text-muted mb-4">{{ profile.bio }}</p>
+          <p class="fst-italic mb-4">{{ profile.bio }}</p>
         {% endif %}
 
         {% if profile.audio_bio %}
@@ -124,8 +162,10 @@ function getCookie(name) {
 }
 
 function likeProfile(profileId) {
-  const card = document.querySelector('.bg-dark') || document.body;
-  card.style.opacity = '0.5';
+  const profileCard = document.getElementById('profile-card');
+  const likeBtn = document.getElementById('btn-like');
+  if (profileCard) profileCard.classList.add('animate-right');
+  if (likeBtn) likeBtn.classList.add('btn-feedback');
 
   fetch('{% url "matching:like_profile" %}', {
     method: 'POST',
@@ -137,28 +177,34 @@ function likeProfile(profileId) {
   })
   .then(response => response.json())
   .then(data => {
-    if (data.success) {
-      if (data.is_match && data.match_data) {
-        if (window.showMatchNotification) window.showMatchNotification(data.match_data);
-        setTimeout(loadNextProfile, 1000);
+    setTimeout(() => {
+      if (data.success) {
+        if (data.is_match && data.match_data) {
+          if (window.showMatchNotification) window.showMatchNotification(data.match_data);
+          setTimeout(loadNextProfile, 1000);
+        } else {
+          loadNextProfile();
+        }
       } else {
-        loadNextProfile();
+        alert('Error: ' + data.error);
+        profileCard?.classList.remove('animate-right');
+        likeBtn?.classList.remove('btn-feedback');
       }
-    } else {
-      alert('Error: ' + data.error);
-      card.style.opacity = '1';
-    }
+    }, 400);
   })
   .catch(error => {
     console.error('Error:', error);
     alert('An error occurred. Please try again.');
-    card.style.opacity = '1';
+    profileCard?.classList.remove('animate-right');
+    likeBtn?.classList.remove('btn-feedback');
   });
 }
 
 function passProfile(profileId) {
-  const card = document.querySelector('.bg-dark') || document.body;
-  card.style.opacity = '0.5';
+  const profileCard = document.getElementById('profile-card');
+  const passBtn = document.getElementById('btn-pass');
+  if (profileCard) profileCard.classList.add('animate-left');
+  if (passBtn) passBtn.classList.add('btn-feedback-danger');
 
   fetch('{% url "matching:pass_profile" %}', {
     method: 'POST',
@@ -170,17 +216,21 @@ function passProfile(profileId) {
   })
   .then(response => response.json())
   .then(data => {
-    if (data.success) {
-      loadNextProfile();
-    } else {
-      alert('Error: ' + data.error);
-      card.style.opacity = '1';
-    }
+    setTimeout(() => {
+      if (data.success) {
+        loadNextProfile();
+      } else {
+        alert('Error: ' + data.error);
+        profileCard?.classList.remove('animate-left');
+        passBtn?.classList.remove('btn-feedback-danger');
+      }
+    }, 400);
   })
   .catch(error => {
     console.error('Error:', error);
     alert('An error occurred. Please try again.');
-    card.style.opacity = '1';
+    profileCard?.classList.remove('animate-left');
+    passBtn?.classList.remove('btn-feedback-danger');
   });
 }
 
@@ -208,14 +258,11 @@ window.addEventListener('DOMContentLoaded', () => {
     const playPromise = audio.play();
     if (playPromise !== undefined) {
       playPromise.catch(error => {
-        console.log('Autoplay blocked:', error);
-
         const tryPlay = () => {
           audio.play().catch(() => {});
           document.removeEventListener('mousemove', tryPlay);
           document.removeEventListener('keydown', tryPlay);
         };
-
         document.addEventListener('mousemove', tryPlay);
         document.addEventListener('keydown', tryPlay);
       });
