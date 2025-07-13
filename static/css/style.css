@@ -1,8 +1,6 @@
-/* Reset & base */
 html, body {
   height: 100%;
   margin: 0;
-  background-color: #0e0e0e;
   color: #f1f1f1;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
@@ -18,7 +16,10 @@ nav.navbar {
   background-color: #2b0e2b;
   border-bottom: 2px solid #ff69b4;
   border-radius: 0 0 15px 15px; /* round bottom corners */
+  padding-top: 0rem;
+  padding-bottom: 0rem;
 }
+
 
 .navbar-brand {
   font-family: 'Pacifico', cursive;
@@ -179,6 +180,18 @@ footer {
   font-weight: 600;
 }
 
+.btn {
+  display: inline-block;
+  font-size: 1.25rem;
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+
 .btn-outline-pink {
   border: 1px solid #ff69b4;
   color: #ff69b4;
@@ -288,4 +301,37 @@ footer {
 .border-pink {
   border-color: #ff69b4 !important; /* pink */
   color: #ff69b4 !important;        /* pink text */
+}
+
+/* Dark themed dropdown menu for profile photo in navbar */
+.dropdown-menu {
+  background-color: #2b0e2b !important; /* dark purple like navbar */
+  border: 1px solid #ff69b4 !important; /* pink border */
+  box-shadow: 0 0 10px #ff69b4cc !important; /* subtle pink glow */
+}
+
+.dropdown-menu .dropdown-item {
+  color: #ff69b4 !important; /* pink text */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+  background-color: #ff69b4 !important; /* pink background */
+  color: #2b0e2b !important; /* dark text */
+  outline: none;
+}
+
+.dropdown-menu .dropdown-divider {
+  border-top: 1px solid #ff69b4;
+}
+
+.dropdown-menu .dropdown-item.text-danger {
+  color: #ff4fc1 !important; /* slightly different pink/red */
+}
+
+.dropdown-menu .dropdown-item.text-danger:hover,
+.dropdown-menu .dropdown-item.text-danger:focus {
+  background-color: #ff4fc1 !important;
+  color: #2b0e2b !important;
 }

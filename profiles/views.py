@@ -52,8 +52,15 @@ def create_profile_view(request):
             profile = form.save(commit=False)
             profile.user = request.user
             profile.is_public = True
+
+            # Clean and save interests manually
+            interests_str = request.POST.get('interests', '')
+            interests_list = [i.strip().lower() for i in interests_str.split(",") if i.strip()]
+            profile.interests = ",".join(interests_list)
+
             profile.save()
             return redirect('profiles:profile_me')
+
     else:
         form = ProfileForm()
 
