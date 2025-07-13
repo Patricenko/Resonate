@@ -3,174 +3,224 @@
 
 {% block title %}Find Your Match{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="match_style.css">
-{% endblock %}
-
 {% block content %}
-<div class="match-container">
-    {% if profile %}
-        <div class="profile-card" id="profile-card" onclick="showProfilePopup({{ profile.id }})">
-            <!-- Info icon to indicate clickable -->
-            <div style="position: absolute; top: 15px; right: 15px; z-index: 5;">
-                <i class="fas fa-info-circle text-white bg-dark bg-opacity-50 rounded-circle p-2" 
-                   title="Click to view full profile"></i>
-            </div>
-            
-            <div class="profile-image">
-                {% if profile.profile_photo %}
-                    <img src="{{ profile.profile_photo.url }}" alt="{{ profile.name }}" class="profile-image">
-                {% else %}
-                    <i class="fas fa-user"></i>
-                {% endif %}
-            </div>
-            
-            <div class="profile-info">
-                <div class="profile-name">{{ profile.name }}</div>
-                
-                <div class="profile-details">
-                    <span><i class="fas fa-birthday-cake"></i> {{ profile.age }}</span>
-                    <span><i class="fas fa-map-marker-alt"></i> {{ profile.location }}</span>
-                    <span><i class="fas fa-ruler-vertical"></i> {{ profile.height }}cm</span>
-                </div>
-                
-                {% if profile.bio %}
-                    <div class="profile-bio">{{ profile.bio }}</div>
-                {% endif %}
-                
-                {% if profile.audio_bio %}
-                    <div class="audio-player">
-                        <audio controls style="width: 100%;">
-                            <source src="{{ profile.audio_bio.url }}" type="audio/mpeg">
-                            Your browser does not support the audio element.
-                        </audio>
-                    </div>
-                {% endif %}
-                
-                {% if profile.interests %}
-                    <div class="profile-interests">
-                        <strong>Interests:</strong> {{ profile.interests }}
-                    </div>
-                {% endif %}
-            </div>
+<style>
+  .border-pink {
+    border-color: #ff69b4 !important;
+    color: #ff69b4 !important;
+  }
+  .interest-bubble {
+    border: 2px solid #ff69b4;
+    color: #ff69b4;
+    border-radius: 50px;
+    padding: 6px 14px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin: 4px 4px 4px 0;
+    background: transparent;
+  }
+  .btn-outline-pink {
+    color: #ff69b4;
+    border-color: #ff69b4;
+    background-color: #444444;  /* Gray background */
+  }
+  .btn-outline-pink:hover {
+    background-color: #ff69b4;
+    color: white;
+  }
+  .btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+    background-color: #444444;  /* Gray background */
+  }
+  .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: white;
+  }
+</style>
+
+<div class="container py-5">
+  {% if profile %}
+  <div class="bg-dark rounded-4 shadow-lg p-4 p-md-5">
+    <div class="row g-5 align-items-center">
+
+      <!-- Left: Profile Photo + Buttons -->
+      <div class="col-md-5 text-center position-relative">
+        <div class="rounded-4 shadow overflow-hidden mx-auto" style="width: 100%; max-width: 450px; aspect-ratio: 1/1; background: url('{% if profile.profile_photo %}{{ profile.profile_photo.url }}{% else %}/static/images/default-avatar.jpg{% endif %}') center / cover no-repeat;">
         </div>
-        
-        <div class="action-buttons" onclick="event.stopPropagation();">
-            <button class="action-btn pass-btn" onclick="passProfile({{ profile.id }})">
-                <i class="fas fa-times"></i>
-            </button>
-            <button class="action-btn like-btn" onclick="likeProfile({{ profile.id }})">
-                <i class="fas fa-heart"></i>
-            </button>
+
+        <div class="d-flex justify-content-center gap-4 mt-4">
+          <button type="button" class="btn btn-outline-danger rounded-circle" style="width: 80px; height: 80px;"
+            onclick="passProfile({{ profile.id }});" title="Pass">
+            <i class="fas fa-times fa-2x"></i>
+          </button>
+          <button type="button" class="btn btn-outline-pink rounded-circle" style="width: 80px; height: 80px;"
+            onclick="likeProfile({{ profile.id }});" title="Like">
+            <i class="fas fa-heart fa-2x"></i>
+          </button>
         </div>
-    {% else %}
-        <div class="no-more-profiles">
-            <h3>No more profiles to show!</h3>
-            <p>Check back later for new matches or adjust your preferences.</p>
-            <a href="{% url 'matching:matches' %}" class="btn btn-primary">View Your Matches</a>
+      </div>
+
+      <!-- Right: Profile Info -->
+      <div class="col-md-7 text-light">
+        <h1 class="text-pink display-5 fw-bold mb-3">{{ profile.name }}, {{ profile.age }}</h1>
+
+        <div class="mb-3" style="max-width: 450px;">
+          <span class="me-3"><i class="fas fa-map-marker-alt text-pink me-1"></i> {{ profile.location }}</span>
+          <span><i class="fas fa-ruler-vertical text-pink me-1"></i> {{ profile.height }} cm</span>
         </div>
-    {% endif %}
+
+        {% if profile.bio %}
+          <p class="fst-italic text-muted mb-4">{{ profile.bio }}</p>
+        {% endif %}
+
+        {% if profile.audio_bio %}
+          <div class="mb-4">
+            <audio controls class="w-100" id="audioBio" autoplay muted>
+              <source src="{{ profile.audio_bio.url }}" type="audio/mpeg">
+              Your browser does not support the audio element.
+            </audio>
+          </div>
+        {% endif %}
+
+        {% if interests_list %}
+          <div>
+            <strong class="text-pink">Interests:</strong>
+            <div class="mt-2">
+              {% for interest in interests_list %}
+                <span class="interest-bubble">{{ interest }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="text-center text-light py-5">
+    <h3>No more profiles to show!</h3>
+    <p>Check back later for new matches or adjust your preferences.</p>
+    <a href="{% url 'matching:matches' %}" class="btn btn-outline-pink mt-3">View Your Matches</a>
+  </div>
+  {% endif %}
 </div>
 
 <script>
 function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for(let i=0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
     }
-    return cookieValue;
+  }
+  return cookieValue;
 }
 
 function likeProfile(profileId) {
-    const card = document.getElementById('profile-card');
-    card.classList.add('loading');
-    
-    fetch('{% url "matching:like_profile" %}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: JSON.stringify({
-            'profile_id': profileId
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            if (data.is_match && data.match_data) {
-                // Use the global popup function from base.html
-                if (window.showMatchNotification) {
-                    window.showMatchNotification(data.match_data);
-                }
-                // Load next profile after a short delay
-                setTimeout(loadNextProfile, 1000);
-            } else {
-                loadNextProfile();
-            }
-        } else {
-            alert('Error: ' + data.error);
-            card.classList.remove('loading');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again.');
-        card.classList.remove('loading');
-    });
+  const card = document.querySelector('.bg-dark') || document.body;
+  card.style.opacity = '0.5';
+
+  fetch('{% url "matching:like_profile" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify({'profile_id': profileId})
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      if (data.is_match && data.match_data) {
+        if (window.showMatchNotification) window.showMatchNotification(data.match_data);
+        setTimeout(loadNextProfile, 1000);
+      } else {
+        loadNextProfile();
+      }
+    } else {
+      alert('Error: ' + data.error);
+      card.style.opacity = '1';
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('An error occurred. Please try again.');
+    card.style.opacity = '1';
+  });
 }
 
 function passProfile(profileId) {
-    const card = document.getElementById('profile-card');
-    card.classList.add('loading');
-    
-    fetch('{% url "matching:pass_profile" %}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: JSON.stringify({
-            'profile_id': profileId
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            loadNextProfile();
-        } else {
-            alert('Error: ' + data.error);
-            card.classList.remove('loading');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again.');
-        card.classList.remove('loading');
-    });
+  const card = document.querySelector('.bg-dark') || document.body;
+  card.style.opacity = '0.5';
+
+  fetch('{% url "matching:pass_profile" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify({'profile_id': profileId})
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      loadNextProfile();
+    } else {
+      alert('Error: ' + data.error);
+      card.style.opacity = '1';
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('An error occurred. Please try again.');
+    card.style.opacity = '1';
+  });
 }
 
 function loadNextProfile() {
-    // Reload the page to get the next profile
-    window.location.reload();
+  window.location.reload();
 }
 
-// Add keyboard support
 document.addEventListener('keydown', function(event) {
-    {% if profile %}
-        if (event.key === 'ArrowLeft') {
-            passProfile({{ profile.id }});
-        } else if (event.key === 'ArrowRight') {
-            likeProfile({{ profile.id }});
-        }
-    {% endif %}
+  {% if profile %}
+    if (event.key === 'ArrowLeft') {
+      passProfile({{ profile.id }});
+    } else if (event.key === 'ArrowRight') {
+      likeProfile({{ profile.id }});
+    } else if (event.code === 'Space') {
+      const audio = document.getElementById('audioBio');
+      if (audio) audio.play().catch(() => {});
+    }
+  {% endif %}
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  const audio = document.getElementById('audioBio');
+  if (audio) {
+    audio.muted = false;
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(error => {
+        console.log('Autoplay blocked:', error);
+
+        const tryPlay = () => {
+          audio.play().catch(() => {});
+          document.removeEventListener('mousemove', tryPlay);
+          document.removeEventListener('keydown', tryPlay);
+        };
+
+        document.addEventListener('mousemove', tryPlay);
+        document.addEventListener('keydown', tryPlay);
+      });
+    }
+  }
 });
 </script>
 {% endblock %}
