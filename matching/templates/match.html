@@ -255,6 +255,7 @@ function likeProfile(profileId) {
             body.classList.remove('bg-pink'); // Remove after done
             loadNextProfile();
           }, 1000);
+          window.location.href = "{% url 'matching:matched_temp' %}";
         } else {
           body.classList.remove('bg-pink');
           loadNextProfile();

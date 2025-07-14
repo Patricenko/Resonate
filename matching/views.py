@@ -136,31 +136,29 @@ def match_view(request):
     return render(request, 'match.html', context)
 
 
-
-
 @login_required
 def like_profile(request):
     """Handle liking a profile via AJAX"""
     if request.method == 'POST':
         data = json.loads(request.body)
         profile_id = data.get('profile_id')
-        
+
         try:
             liked_profile = Profile.objects.get(id=profile_id)
             liked_user = liked_profile.user
-            
+
             # Create the like
             like, created = Like.objects.get_or_create(
                 liker=request.user,
                 liked=liked_user
             )
-            
+
             # Check if there's a mutual like (match)
             mutual_like = Like.objects.filter(
                 liker=liked_user,
                 liked=request.user
             ).exists()
-            
+
             match_data = None
             is_match = False
             if mutual_like:
@@ -170,7 +168,7 @@ def like_profile(request):
                     user2=max(request.user, liked_user, key=lambda u: u.id)
                 )
                 is_match = match_created
-                
+
                 if match_created:
                     # Get match data for popup
                     match_data = {
@@ -182,17 +180,19 @@ def like_profile(request):
                             'age': liked_profile.age
                         }
                     }
-            
+                    # ➕ Store name for animation screen
+                    request.session['matched_user_name'] = liked_profile.name
+
             return JsonResponse({
                 'success': True,
                 'is_match': is_match,
                 'liked_user': liked_user.username,
                 'match_data': match_data
             })
-            
+
         except Profile.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Profile not found'})
-    
+
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 
@@ -361,3 +361,10 @@ def get_profile_popup(request, profile_id):
         
     except Profile.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Profile not found'})
+
+@login_required
+def matched_temp(request):
+    """Temporary animation screen after a successful match"""
+    matched_user_name = request.session.get('matched_user_name', None)
+    return render(request, 'matched.html', {'matched_user_name': matched_user_name})
+
