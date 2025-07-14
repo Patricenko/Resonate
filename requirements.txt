@@ -1,0 +1,19 @@
+# Django Web Framework
+Django==5.2.4
+
+# Environment variables management
+python-dotenv==1.0.0
+
+# Image processing for ImageField
+Pillow==10.0.0
+
+# Geolocation services
+geopy==2.3.0
+
+# Production server (optional)
+gunicorn==21.2.0
+
+# Development dependencies (optional)
+# Uncomment these for development
+# django-debug-toolbar==4.2.0
+# django-extensions==3.2.3
