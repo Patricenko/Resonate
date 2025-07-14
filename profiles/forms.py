@@ -65,7 +65,7 @@ class ProfileForm(forms.ModelForm):
         if image_file:
             # Check file extension
             file_name = image_file.name.lower()
-            allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp']
+            allowed_extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.webp']
             
             if not any(file_name.endswith(ext) for ext in allowed_extensions):
                 raise ValidationError(
