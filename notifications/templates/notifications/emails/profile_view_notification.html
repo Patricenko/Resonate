@@ -1,0 +1,30 @@
+{% extends "notifications/emails/base_email.html" %}
+
+{% block content %}
+<h2>👁️ Someone viewed your profile, {{ user.first_name|default:user.username }}!</h2>
+
+<p>Your {{ site_name }} profile is getting attention!</p>
+
+<div style="background-color: #f3e5f5; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
+    <h3><span class="highlight">{{ viewer.first_name|default:viewer.username }}</span> checked out your profile! 👀</h3>
+    {% if viewer.profile.profile_photo %}
+    <img src="{{ viewer.profile.profile_photo.url }}" alt="Profile photo" style="width: 80px; height: 80px; border-radius: 50%; margin: 10px;">
+    {% endif %}
+    <p><strong>Age:</strong> {{ viewer.profile.age }}</p>
+    <p><strong>Location:</strong> {{ viewer.profile.location }}</p>
+    {% if viewer.profile.interests %}
+    <p><strong>Interests:</strong> {{ viewer.profile.interests }}</p>
+    {% endif %}
+</div>
+
+<p>Curious about who's been looking at your profile? Take a look at {{ viewer.first_name|default:viewer.username }}'s profile and see if there's a connection!</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="http://127.0.0.1:8000/matching/" class="button">View Their Profile 🔍</a>
+</div>
+
+<p>Profile views often lead to likes, and likes lead to matches! 😉</p>
+
+<p>Keep your profile fresh and active,<br>
+<strong>The {{ site_name }} Team</strong></p>
+{% endblock %}
