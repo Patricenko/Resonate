@@ -164,6 +164,7 @@
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
                 <li><a class="dropdown-item" href="{% url 'profiles:profile_me' %}">View Profile</a></li>
                 <li><a class="dropdown-item" href="{% url 'profiles:edit_profile' %}">Edit Profile</a></li>
+                <li><a class="dropdown-item" href="{% url 'notification_preferences' %}"><i class="fas fa-bell"></i> Notifications</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                   <form method="post" action="{% url 'users:logout' %}" class="m-0">

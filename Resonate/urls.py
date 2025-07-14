@@ -1,5 +1,5 @@
 """
-URL configuration for Dinter project.
+URL configuration for Resonate project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.2/topics/http/urls/
@@ -27,6 +27,7 @@ urlpatterns = [
     path('users/', include('users.urls', namespace='users')),
     path('profiles/', include('profiles.urls', namespace='profiles')),
     path('matching/', include('matching.urls', namespace='matching')),
+    path('notifications/', include('notifications.urls')),
     path('', index_view, name='index'),  # Homepage view
 ]
 
