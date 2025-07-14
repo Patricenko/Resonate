@@ -14,9 +14,36 @@
     <form method="POST" enctype="multipart/form-data" novalidate>
       {% csrf_token %}
       <div class="row g-3">
+
         {% for field in form %}
           {% if field.name == 'is_public' %}
             {# Skip is_public #}
+
+          {% elif field.name == 'location' %}
+            <div class="col-md-6">
+              <label for="autocomplete" class="form-label">Location</label>
+              <input
+                id="autocomplete"
+                type="text"
+                class="form-control"
+                placeholder="Enter your location"
+                autocomplete="off"
+              >
+              <input
+                type="hidden"
+                name="location"
+                id="id_location"
+                value="{{ field.value|default_if_none:'' }}"
+              >
+              {% if field.errors %}
+                <div class="text-danger small mt-1">
+                  {% for error in field.errors %}
+                    {{ error }}<br>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
           {% elif field.name == 'interests' %}
             <div class="col-12">
               <label class="form-label">Interests</label>
@@ -31,7 +58,6 @@
                   </button>
                 {% endfor %}
               </div>
-              <!-- Fix here: output raw string value, no join -->
               <input type="hidden" name="{{ field.name }}" id="id_interests" value="{{ field.value|default:'' }}">
               {% if field.errors %}
                 <div class="text-danger small mt-1">
@@ -41,6 +67,7 @@
                 </div>
               {% endif %}
             </div>
+
           {% elif field.name == 'profile_photo' %}
             <div class="col-12">
               <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
@@ -53,7 +80,35 @@
                 </div>
               {% endif %}
             </div>
-          {% elif field.name in 'bio social_links audio_bio' %}
+
+          {% elif field.name == 'social_links' %}
+            <div class="col-12">
+              <label class="form-label">Social Links</label>
+              <div id="social-links-wrapper">
+                {% for label in social_labels %}
+                  <div class="mb-2">
+                    <label class="form-label">{{ label }}</label>
+                    <input type="text" class="form-control social-input" name="social_{{ label|lower }}" placeholder="Enter {{ label }}...">
+                  </div>
+                {% endfor %}
+                <div class="mb-2">
+                  <label class="form-label">Custom</label>
+                  <input type="text" class="form-control mb-1" id="custom-key" placeholder="Custom platform (e.g., Telegram)">
+                  <input type="text" class="form-control" id="custom-value" placeholder="Enter your handle or link">
+                  <button type="button" id="add-custom-social" class="btn btn-sm btn-outline-pink mt-2">Add Custom</button>
+                </div>
+              </div>
+              <input type="hidden" name="social_links" id="id_social_links" value='{{ field.value|default:"{}" }}'>
+            </div>
+            {% if field.errors %}
+              <div class="text-danger small mt-1">
+                {% for error in field.errors %}
+                  {{ error }}<br>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+          {% elif field.name in 'bio audio_bio' %}
             <div class="col-12">
               <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
               {{ field|add_class:"form-control" }}
@@ -65,6 +120,7 @@
                 </div>
               {% endif %}
             </div>
+
           {% else %}
             <div class="col-md-4">
               <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
@@ -77,8 +133,10 @@
                 </div>
               {% endif %}
             </div>
+
           {% endif %}
         {% endfor %}
+
       </div>
 
       <button type="submit" class="form-submit mt-4 w-100">Save Changes</button>
@@ -106,48 +164,46 @@
 <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet"/>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Interests toggle buttons
-    const buttons = document.querySelectorAll(".interest-button");
-    const hiddenInput = document.getElementById("id_interests");
-    let selected = hiddenInput.value ? hiddenInput.value.split(",") : [];
+document.addEventListener("DOMContentLoaded", function () {
+  // Interests toggle buttons
+  const buttons = document.querySelectorAll(".interest-button");
+  const hiddenInput = document.getElementById("id_interests");
+  let selected = hiddenInput.value ? hiddenInput.value.split(",") : [];
 
-    buttons.forEach(btn => {
-      if (selected.includes(btn.dataset.interest)) {
-        btn.classList.add("selected", "btn-pink");
-        btn.classList.remove("btn-outline-pink");
+  buttons.forEach(btn => {
+    if (selected.includes(btn.dataset.interest)) {
+      btn.classList.add("btn-pink");
+      btn.classList.remove("btn-outline-pink");
+    }
+  });
+
+  buttons.forEach(button => {
+    button.addEventListener("click", () => {
+      const interest = button.dataset.interest;
+      if (selected.includes(interest)) {
+        selected = selected.filter(i => i !== interest);
+        button.classList.remove("btn-pink");
+        button.classList.add("btn-outline-pink");
       } else {
-        btn.classList.add("btn-outline-pink");
-        btn.classList.remove("btn-pink");
+        selected.push(interest);
+        button.classList.add("btn-pink");
+        button.classList.remove("btn-outline-pink");
       }
+      hiddenInput.value = selected.join(",");
     });
+  });
 
-    buttons.forEach(button => {
-      button.addEventListener("click", () => {
-        const interest = button.dataset.interest;
-        if (selected.includes(interest)) {
-          selected = selected.filter(i => i !== interest);
-          button.classList.remove("selected", "btn-pink");
-          button.classList.add("btn-outline-pink");
-        } else {
-          selected.push(interest);
-          button.classList.add("selected", "btn-pink");
-          button.classList.remove("btn-outline-pink");
-        }
-        hiddenInput.value = selected.join(",");
-      });
-    });
+  // Cropper logic for profile photo
+  const inputFile = document.querySelector('input[type="file"][name="profile_photo"]');
+  const cropperModal = document.getElementById("cropper-modal");
+  const cropperImage = document.getElementById("cropper-image");
+  const cropperCancel = document.getElementById("cropper-cancel");
+  const cropperUse = document.getElementById("cropper-use");
+  let cropper = null;
 
-    // Cropper logic
-    const inputFile = document.querySelector('input[type="file"][name="profile_photo"]');
-    const cropperModal = document.getElementById("cropper-modal");
-    const cropperImage = document.getElementById("cropper-image");
-    const cropperCancel = document.getElementById("cropper-cancel");
-    const cropperUse = document.getElementById("cropper-use");
-    let cropper = null;
+  cropperModal.style.display = "none";
 
-    cropperModal.style.display = "none";
-
+  if(inputFile) {
     inputFile.addEventListener("change", function () {
       const file = this.files[0];
       if (!file) {
@@ -172,37 +228,156 @@
         autoCropArea: 1,
       });
     });
+  }
 
-    cropperCancel.addEventListener("click", () => {
+  cropperCancel.addEventListener("click", () => {
+    cropperModal.style.display = "none";
+    if(inputFile) inputFile.value = ""; // reset input if cancel
+    if (cropper) {
+      cropper.destroy();
+      cropper = null;
+    }
+  });
+
+  cropperUse.addEventListener("click", () => {
+    if (!cropper) return;
+
+    cropper.getCroppedCanvas({
+      width: 400,
+      height: 400,
+      imageSmoothingQuality: 'high'
+    }).toBlob(blob => {
+      const fileInput = inputFile;
+
+      const dataTransfer = new DataTransfer();
+      const newFile = new File([blob], "cropped_profile_photo.png", { type: "image/png" });
+      dataTransfer.items.add(newFile);
+      fileInput.files = dataTransfer.files;
+
       cropperModal.style.display = "none";
-      inputFile.value = ""; // reset input if cancel
-      if (cropper) {
-        cropper.destroy();
-        cropper = null;
+      cropper.destroy();
+      cropper = null;
+    }, "image/png");
+  });
+
+  // Social links logic
+  const socialInputs = document.querySelectorAll(".social-input");
+  const hiddenSocialField = document.getElementById("id_social_links");
+  const addCustomBtn = document.getElementById("add-custom-social");
+  const customKeyInput = document.getElementById("custom-key");
+  const customValueInput = document.getElementById("custom-value");
+  const socialLinksWrapper = document.getElementById("social-links-wrapper");
+
+  function loadSocialLinks() {
+    let socialData = {};
+    try {
+      socialData = JSON.parse(hiddenSocialField.value || "{}");
+    } catch (e) {
+      socialData = {};
+    }
+
+    socialInputs.forEach(input => {
+      const key = input.name.replace("social_", "");
+      if (socialData[key]) {
+        input.value = socialData[key];
       }
     });
 
-    cropperUse.addEventListener("click", () => {
-      if (!cropper) return;
-
-      cropper.getCroppedCanvas({
-        width: 400,
-        height: 400,
-        imageSmoothingQuality: 'high'
-      }).toBlob(blob => {
-        const fileInput = inputFile;
-
-        const dataTransfer = new DataTransfer();
-        const newFile = new File([blob], "cropped_profile_photo.png", { type: "image/png" });
-        dataTransfer.items.add(newFile);
-        fileInput.files = dataTransfer.files;
-
-        cropperModal.style.display = "none";
-        cropper.destroy();
-        cropper = null;
-      }, "image/png");
+    // For custom entries, create inputs dynamically if needed
+    Object.keys(socialData).forEach(key => {
+      if (![...socialInputs].some(input => input.name.replace("social_", "") === key)) {
+        const div = document.createElement("div");
+        div.className = "mb-2";
+        div.innerHTML = `
+          <label class="form-label">${key}</label>
+          <input type="text" class="form-control social-input" name="social_${key}" value="${socialData[key]}" placeholder="Enter ${key}...">
+        `;
+        socialLinksWrapper.insertBefore(div, addCustomBtn.parentElement);
+      }
     });
+  }
+
+  function collectSocialLinks() {
+    const result = {};
+    document.querySelectorAll(".social-input").forEach(input => {
+      const key = input.name.replace("social_", "").trim();
+      const val = input.value.trim();
+      if (key && val) {
+        result[key] = val;
+      }
+    });
+    hiddenSocialField.value = JSON.stringify(result);
+  }
+
+  socialInputs.forEach(input => input.addEventListener("input", collectSocialLinks));
+
+  addCustomBtn.addEventListener("click", () => {
+    const key = customKeyInput.value.trim();
+    const val = customValueInput.value.trim();
+    if (!key || !val) return;
+
+    if ([...document.querySelectorAll(".social-input")].some(input => input.name === `social_${key}`)) {
+      alert("This social platform is already added.");
+      return;
+    }
+
+    const div = document.createElement("div");
+    div.className = "mb-2";
+    div.innerHTML = `
+      <label class="form-label">${key}</label>
+      <input type="text" class="form-control social-input" name="social_${key}" value="${val}" placeholder="Enter ${key}...">
+    `;
+    socialLinksWrapper.insertBefore(div, addCustomBtn.parentElement);
+
+    div.querySelector("input").addEventListener("input", collectSocialLinks);
+
+    collectSocialLinks();
+
+    customKeyInput.value = "";
+    customValueInput.value = "";
   });
+
+  loadSocialLinks();
+
+});
+
+// Google Maps Places Autocomplete callback
+function initAutocomplete() {
+  const autocompleteInput = document.getElementById('autocomplete');
+  const hiddenLocation = document.getElementById('id_location');
+
+  const autocomplete = new google.maps.places.Autocomplete(autocompleteInput, {
+    types: ['geocode'],
+  });
+
+  autocomplete.addListener('place_changed', () => {
+    const place = autocomplete.getPlace();
+    if (!place.address_components) {
+      hiddenLocation.value = '';
+      return;
+    }
+
+    let city = '';
+    let country = '';
+
+    for (const component of place.address_components) {
+      const types = component.types;
+      if (types.includes("locality")) city = component.long_name;
+      if (types.includes("country")) country = component.long_name;
+    }
+
+    // Build address: skip postal code
+    const cleanLocation = `${city}${country ? ', ' + country : ''}`;
+    hiddenLocation.value = cleanLocation;
+    autocompleteInput.value = cleanLocation;
+  });
+
+  // Prefill autocomplete input if hidden field has a value
+  if (hiddenLocation.value) {
+    autocompleteInput.value = hiddenLocation.value;
+  }
+}
+
 </script>
 
 <style>
@@ -216,25 +391,28 @@
     transition: background-color 0.3s, color 0.3s;
   }
 
-  /* Outline pink button */
   .btn-outline-pink {
     background-color: transparent !important;
     color: #ff69b4 !important;
     border: 2px solid #ff69b4 !important;
   }
 
-  /* Filled pink button */
   .btn-pink {
     background-color: #ff69b4 !important;
     color: white !important;
     border-color: #ff69b4 !important;
   }
 
-  /* Hover effect only for unselected buttons */
   .interest-button.btn-outline-pink:hover {
     background-color: #ff69b4 !important;
     color: white !important;
   }
 </style>
-{% endblock %}
 
+<!-- Google Maps API -->
+<script
+  src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_API_KEY }}&libraries=places&callback=initAutocomplete"
+  async
+  defer
+></script>
+{% endblock %}

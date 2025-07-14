@@ -1,23 +1,49 @@
 {% extends "base.html" %}
-{% block title %}{{ profile.name }} - Profile | Dinter{% endblock %}
+{% block title %}{{ profile.name }} - Profile | Resonate{% endblock %}
 
 {% block content %}
-    <style>
+<style>
   .border-pink {
     border-color: #ff69b4 !important;
     color: #ff69b4 !important;
+  }
+
+  .audio-bio-label {
+    font-size: 1.1rem;
+    color: #ff69b4;
+  }
+
+  .audio-bio-player {
+    width: 250px;
+    height: 32px;
+    display: block;
+  }
+
+  .text-muted {
+    font-size: 1.05rem;
+  }
+
+  .display-5 {
+    font-size: 2.5rem;
+  }
+
+  .profile-card {
+    background-color: rgba(0, 0, 0, 0.5);
   }
 </style>
 
 <div class="container py-3">
   <div class="row justify-content-center">
     <div class="col-lg-10">
-      <div class="bg-dark rounded-4 shadow-lg p-4 p-md-5">
+      <div class="profile-card rounded-4 shadow-lg p-4 p-md-5">
         <div class="row g-5 align-items-start">
 
           <!-- Left: Profile Photo -->
           <div class="col-md-5 text-center">
-            <div class="rounded-4 shadow overflow-hidden mx-auto" style="width: 100%; max-width: 450px; aspect-ratio: 1/1; background: url('{% if profile.profile_photo %}{{ profile.profile_photo.url }}{% else %}/static/images/default-avatar.jpg{% endif %}') center / cover no-repeat;"></div>
+            <div class="rounded-4 shadow overflow-hidden mx-auto"
+                 style="width: 100%; max-width: 450px; aspect-ratio: 1/1;
+                        background: url('{% if profile.profile_photo %}{{ profile.profile_photo.url }}{% else %}/static/images/default-avatar.jpg{% endif %}') center / cover no-repeat;">
+            </div>
           </div>
 
           <!-- Right: Profile Info -->
@@ -25,7 +51,7 @@
             <h1 class="text-pink display-5 fw-bold mb-3">{{ profile.name }}, {{ profile.age }}</h1>
 
             {% if profile.bio %}
-              <p class="fst-italic text-muted">{{ profile.bio }}</p>
+              <p class="fst-italic">{{ profile.bio }}</p>
             {% endif %}
 
             <ul class="list-unstyled mt-3 mb-4" style="max-width: 450px;">
@@ -53,10 +79,6 @@
                 <i class="fas fa-users text-pink me-2" style="min-width: 20px;"></i>
                 <strong class="me-1">Preferred Age Range:</strong> {{ profile.preferred_age_min }}–{{ profile.preferred_age_max }}
               </li>
-              <li class="mb-1 d-flex align-items-center">
-                <i class="fas fa-globe text-pink me-2" style="min-width: 20px;"></i>
-                <strong class="me-1">Public Profile:</strong> {{ profile.is_public|yesno:"Yes,No" }}
-              </li>
             </ul>
 
             {% if interests_list %}
@@ -72,8 +94,8 @@
 
             {% if profile.audio_bio %}
               <div class="mb-4">
-                <strong><i class="fas fa-microphone text-pink me-2"></i>Audio Bio:</strong>
-                <audio controls class="w-100 mt-2">
+                <div class="audio-bio-label mb-2"><i class="fas fa-microphone me-1"></i><strong>Audio Bio:</strong></div>
+                <audio controls class="audio-bio-player">
                   <source src="{{ profile.audio_bio.url }}" type="audio/mpeg">
                   Your browser does not support the audio element.
                 </audio>
@@ -85,7 +107,7 @@
                 <strong><i class="fas fa-link text-pink me-2"></i>Social Links:</strong>
                 <ul class="list-unstyled mt-2">
                   {% for key, value in profile.social_links.items %}
-                    <li class="mb-1"><strong>{{ key|title }}:</strong> <a href="{{ value }}" target="_blank" class="text-pink text-decoration-none">{{ value }}</a></li>
+                    <li class="mb-1"><strong>{{ key|title }}:</strong> <a href="" target="_blank" class="text-pink text-decoration-none">{{ value }}</a></li>
                   {% endfor %}
                 </ul>
               </div>

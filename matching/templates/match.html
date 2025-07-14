@@ -15,7 +15,7 @@
     border-radius: 50px;
     padding: 6px 14px;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 1.05rem;
     display: inline-block;
     margin: 4px 4px 4px 0;
     background: transparent;
@@ -39,7 +39,6 @@
     color: white;
   }
 
-  /* Animation classes */
   @keyframes slideOutLeft {
     to { transform: translateX(-100%) rotate(-10deg); opacity: 0; }
   }
@@ -50,12 +49,42 @@
     from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.15); }
-    100% { transform: scale(1); }
-  }
+  @keyframes pulsePink {
+      0% {
+        box-shadow: inset 0 0 0 0 rgba(255, 105, 180, 0);
+        background-color: rgba(0, 0, 0, 0.75);
+      }
+      50% {
+        box-shadow: inset 0 0 150px 80px rgba(255, 105, 180, 1);
+        background-color: rgba(255, 105, 180, 0.3);
+      }
+      100% {
+        box-shadow: inset 0 0 0 0 rgba(255, 105, 180, 0);
+        background-color: rgba(0, 0, 0, 0.75);
+      }
+    }
 
+    @keyframes pulseRed {
+      0% {
+        box-shadow: inset 0 0 0 0 rgba(220, 53, 69, 0);
+        background-color: rgba(0, 0, 0, 0.75);
+      }
+      50% {
+        box-shadow: inset 0 0 150px 80px rgba(220, 53, 69, 1);
+        background-color: rgba(220, 53, 69, 0.3);
+      }
+      100% {
+        box-shadow: inset 0 0 0 0 rgba(220, 53, 69, 0);
+        background-color: rgba(0, 0, 0, 0.75);
+      }
+    }
+
+    .pulse-pink {
+      animation: pulsePink 0.8s ease;
+    }
+    .pulse-red {
+      animation: pulseRed 0.8s ease;
+    }
   .animate-in {
     animation: fadeInUp 0.5s ease-out;
   }
@@ -65,27 +94,35 @@
   .animate-right {
     animation: slideOutRight 0.5s forwards;
   }
-  .btn-feedback {
-    animation: pulse 0.4s ease;
-    background-color: #ff69b4 !important;
-    color: white !important;
-    border-color: #ff69b4 !important;
+
+  .audio-bio-label {
+    font-size: 1.1rem;
+    color: #ff69b4;
   }
-  .btn-feedback-danger {
-    animation: pulse 0.4s ease;
-    background-color: #dc3545 !important;
-    color: white !important;
-    border-color: #dc3545 !important;
+
+  .audio-bio-player {
+    width: 250px;
+    height: 32px;
+    display: block;
+  }
+
+  .text-light, .fst-italic {
+    font-size: 1.05rem;
+  }
+
+  h1, .display-5 {
+    font-size: 2.75rem;
   }
 </style>
 
 <div class="container py-5">
   {% if profile %}
-  <div id="profile-card" class="bg-dark rounded-4 shadow-lg p-4 p-md-5 animate-in">
+  <div id="profile-card" class="rounded-4 shadow-lg p-4 p-md-5 mx-auto animate-in"
+     style="background-color: rgba(0, 0, 0, 0.75); max-width: 50vw;">
     <div class="row g-5 align-items-center">
-      <!-- Left: Profile Photo + Buttons -->
       <div class="col-md-5 text-center position-relative">
-        <div class="rounded-4 shadow overflow-hidden mx-auto" style="width: 100%; max-width: 450px; aspect-ratio: 1/1; background: url('{% if profile.profile_photo %}{{ profile.profile_photo.url }}{% else %}/static/images/default-avatar.jpg{% endif %}') center / cover no-repeat;">
+        <div class="rounded-4 shadow overflow-hidden mx-auto"
+             style="width: 100%; max-width: 450px; aspect-ratio: 1/1; background: url('{% if profile.profile_photo %}{{ profile.profile_photo.url }}{% else %}/static/images/default-avatar.jpg{% endif %}') center / cover no-repeat;">
         </div>
 
         <div class="d-flex justify-content-center gap-4 mt-4">
@@ -100,7 +137,6 @@
         </div>
       </div>
 
-      <!-- Right: Profile Info -->
       <div class="col-md-7 text-light">
         <h1 class="text-pink display-5 fw-bold mb-3">{{ profile.name }}, {{ profile.age }}</h1>
 
@@ -115,7 +151,8 @@
 
         {% if profile.audio_bio %}
           <div class="mb-4">
-            <audio controls class="w-100" id="audioBio" autoplay muted>
+            <div class="audio-bio-label mb-2">🎵 <strong>Audio Bio:</strong></div>
+            <audio controls id="audioBio" class="audio-bio-player" autoplay muted>
               <source src="{{ profile.audio_bio.url }}" type="audio/mpeg">
               Your browser does not support the audio element.
             </audio>
@@ -130,6 +167,21 @@
                 <span class="interest-bubble">{{ interest }}</span>
               {% endfor %}
             </div>
+          </div>
+        {% endif %}
+
+        {% if profile.social_links %}
+          <div class="mt-4">
+            <strong class="text-pink">Social Links:</strong>
+            <ul class="list-unstyled mt-2">
+              {% for key, value in profile.social_links.items %}
+                <li>
+                  <i class="fas fa-link text-pink me-1"></i>
+                  <strong>{{ key|capfirst }}:</strong>
+                  <a href="" target="_blank" class="text-decoration-underline text-light">{{ value }}</a>
+                </li>
+              {% endfor %}
+            </ul>
           </div>
         {% endif %}
       </div>
@@ -161,11 +213,18 @@ function getCookie(name) {
   return cookieValue;
 }
 
+function restartAnimation(el, className) {
+  el.classList.remove(className);
+  void el.offsetWidth;
+  el.classList.add(className);
+}
+
 function likeProfile(profileId) {
+  const body = document.body;
+  restartAnimation(body, 'pulse-pink');
+
   const profileCard = document.getElementById('profile-card');
-  const likeBtn = document.getElementById('btn-like');
   if (profileCard) profileCard.classList.add('animate-right');
-  if (likeBtn) likeBtn.classList.add('btn-feedback');
 
   fetch('{% url "matching:like_profile" %}', {
     method: 'POST',
@@ -188,7 +247,7 @@ function likeProfile(profileId) {
       } else {
         alert('Error: ' + data.error);
         profileCard?.classList.remove('animate-right');
-        likeBtn?.classList.remove('btn-feedback');
+        body.classList.remove('pulse-pink');
       }
     }, 400);
   })
@@ -196,15 +255,16 @@ function likeProfile(profileId) {
     console.error('Error:', error);
     alert('An error occurred. Please try again.');
     profileCard?.classList.remove('animate-right');
-    likeBtn?.classList.remove('btn-feedback');
+    body.classList.remove('pulse-pink');
   });
 }
 
 function passProfile(profileId) {
+  const body = document.body;
+  restartAnimation(body, 'pulse-red');
+
   const profileCard = document.getElementById('profile-card');
-  const passBtn = document.getElementById('btn-pass');
   if (profileCard) profileCard.classList.add('animate-left');
-  if (passBtn) passBtn.classList.add('btn-feedback-danger');
 
   fetch('{% url "matching:pass_profile" %}', {
     method: 'POST',
@@ -222,7 +282,7 @@ function passProfile(profileId) {
       } else {
         alert('Error: ' + data.error);
         profileCard?.classList.remove('animate-left');
-        passBtn?.classList.remove('btn-feedback-danger');
+        body.classList.remove('pulse-red');
       }
     }, 400);
   })
@@ -230,7 +290,7 @@ function passProfile(profileId) {
     console.error('Error:', error);
     alert('An error occurred. Please try again.');
     profileCard?.classList.remove('animate-left');
-    passBtn?.classList.remove('btn-feedback-danger');
+    body.classList.remove('pulse-red');
   });
 }
 
