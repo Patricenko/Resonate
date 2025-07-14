@@ -49,42 +49,52 @@
     from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
   @keyframes pulsePink {
-      0% {
-        box-shadow: inset 0 0 0 0 rgba(255, 105, 180, 0);
-        background-color: rgba(0, 0, 0, 0.75);
-      }
-      50% {
-        box-shadow: inset 0 0 150px 80px rgba(255, 105, 180, 1);
-        background-color: rgba(255, 105, 180, 0.3);
-      }
-      100% {
-        box-shadow: inset 0 0 0 0 rgba(255, 105, 180, 0);
-        background-color: rgba(0, 0, 0, 0.75);
-      }
+    0% {
+      box-shadow: inset 0 0 0 0 rgba(255, 105, 180, 0);
+      background-color: rgba(0, 0, 0, 0.75);
     }
+    50% {
+      box-shadow: inset 0 0 150px 80px rgba(255, 105, 180, 1);
+      background-color: rgba(255, 105, 180, 0.3);
+    }
+    100% {
+      box-shadow: inset 0 0 0 0 rgba(255, 105, 180, 0);
+      background-color: rgba(0, 0, 0, 0.75);
+    }
+  }
 
-    @keyframes pulseRed {
-      0% {
-        box-shadow: inset 0 0 0 0 rgba(220, 53, 69, 0);
-        background-color: rgba(0, 0, 0, 0.75);
-      }
-      50% {
-        box-shadow: inset 0 0 150px 80px rgba(220, 53, 69, 1);
-        background-color: rgba(220, 53, 69, 0.3);
-      }
-      100% {
-        box-shadow: inset 0 0 0 0 rgba(220, 53, 69, 0);
-        background-color: rgba(0, 0, 0, 0.75);
-      }
+  @keyframes pulseRed {
+    0% {
+      box-shadow: inset 0 0 0 0 rgba(220, 53, 69, 0);
+      background-color: rgba(0, 0, 0, 0.75);
     }
+    50% {
+      box-shadow: inset 0 0 150px 80px rgba(220, 53, 69, 1);
+      background-color: rgba(220, 53, 69, 0.3);
+    }
+    100% {
+      box-shadow: inset 0 0 0 0 rgba(220, 53, 69, 0);
+      background-color: rgba(0, 0, 0, 0.75);
+    }
+  }
 
-    .pulse-pink {
-      animation: pulsePink 0.8s ease;
-    }
-    .pulse-red {
-      animation: pulseRed 0.8s ease;
-    }
+  .pulse-pink {
+    animation: pulsePink 0.8s ease;
+  }
+  .pulse-red {
+    animation: pulseRed 0.8s ease;
+  }
+
+  /* Persistent bright backgrounds during animation */
+  .bg-pink {
+    background-color: #ff69b4 !important;
+  }
+  .bg-red {
+    background-color: #dc3545 !important;
+  }
+
   .animate-in {
     animation: fadeInUp 0.5s ease-out;
   }
@@ -221,6 +231,7 @@ function restartAnimation(el, className) {
 
 function likeProfile(profileId) {
   const body = document.body;
+  body.classList.add('bg-pink'); // Add persistent pink background
   restartAnimation(body, 'pulse-pink');
 
   const profileCard = document.getElementById('profile-card');
@@ -240,14 +251,19 @@ function likeProfile(profileId) {
       if (data.success) {
         if (data.is_match && data.match_data) {
           if (window.showMatchNotification) window.showMatchNotification(data.match_data);
-          setTimeout(loadNextProfile, 1000);
+          setTimeout(() => {
+            body.classList.remove('bg-pink'); // Remove after done
+            loadNextProfile();
+          }, 1000);
         } else {
+          body.classList.remove('bg-pink');
           loadNextProfile();
         }
       } else {
         alert('Error: ' + data.error);
         profileCard?.classList.remove('animate-right');
         body.classList.remove('pulse-pink');
+        body.classList.remove('bg-pink');
       }
     }, 400);
   })
@@ -256,11 +272,13 @@ function likeProfile(profileId) {
     alert('An error occurred. Please try again.');
     profileCard?.classList.remove('animate-right');
     body.classList.remove('pulse-pink');
+    body.classList.remove('bg-pink');
   });
 }
 
 function passProfile(profileId) {
   const body = document.body;
+  body.classList.add('bg-red'); // Add persistent red background
   restartAnimation(body, 'pulse-red');
 
   const profileCard = document.getElementById('profile-card');
@@ -278,11 +296,13 @@ function passProfile(profileId) {
   .then(data => {
     setTimeout(() => {
       if (data.success) {
+        body.classList.remove('bg-red');
         loadNextProfile();
       } else {
         alert('Error: ' + data.error);
         profileCard?.classList.remove('animate-left');
         body.classList.remove('pulse-red');
+        body.classList.remove('bg-red');
       }
     }, 400);
   })
@@ -291,6 +311,7 @@ function passProfile(profileId) {
     alert('An error occurred. Please try again.');
     profileCard?.classList.remove('animate-left');
     body.classList.remove('pulse-red');
+    body.classList.remove('bg-red');
   });
 }
 
