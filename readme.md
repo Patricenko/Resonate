@@ -1,20 +1,21 @@
 
 # ![Resonance2 Logo](static/images/resonance2.png)
 
-# Resonate Django Project
+# Resonate
 
-Welcome to the **Resonate** Django project!  
-This project provides a stylish matchmaking web app with rich profile interactions and a modern UI.
+Welcome to the **Resonate**!  
+This project provides a stylish matchmaking web app with rich profile interactions and a modern UI for people with eye conditions.
 
 ---
 
 ## Features
 
-- User authentication and profile management  
+- User authentication and profile management
 - Interactive match cards with new match badges  
 - Profile popups with photo, bio, audio message, and action buttons  
 - Responsive and modern design with animations and gradients  
-- REST API integration for profiles and matching actions  
+- REST API integration for profiles and matching actions
+- Ideal for people with eye conditions
 
 ---
 
@@ -97,19 +98,13 @@ http://127.0.0.1:8000/
 
 ## Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check [issues page](https://github.com/yourusername/resonate/issues).
+Contributions, issues, and feature requests are welcome! Feel free to check [issues page](https://github.com/Patricenko/dinter/issues).
 
 ---
 
 ## License
 
 This project is licensed under the MIT License.
-
----
-
-## Contact
-
-For questions or support, contact: [your-email@example.com]
 
 ---
 
