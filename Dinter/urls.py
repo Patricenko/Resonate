@@ -31,5 +31,8 @@ urlpatterns = [
 ]
 
 # Serve media files during development
+# Serve static and media files when running locally
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+

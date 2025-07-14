@@ -15,7 +15,7 @@
     border-radius: 50px;
     padding: 6px 14px;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 1.05rem;
     display: inline-block;
     margin: 4px 4px 4px 0;
     background: transparent;
@@ -23,7 +23,7 @@
   .btn-outline-pink {
     color: #ff69b4;
     border-color: #ff69b4;
-    background-color: #444444;  /* Gray background */
+    background-color: #444444;
   }
   .btn-outline-pink:hover {
     background-color: #ff69b4;
@@ -32,37 +32,121 @@
   .btn-outline-danger {
     color: #dc3545;
     border-color: #dc3545;
-    background-color: #444444;  /* Gray background */
+    background-color: #444444;
   }
   .btn-outline-danger:hover {
     background-color: #dc3545;
     color: white;
   }
+
+  @keyframes slideOutLeft {
+    to { transform: translateX(-100%) rotate(-10deg); opacity: 0; }
+  }
+  @keyframes slideOutRight {
+    to { transform: translateX(100%) rotate(10deg); opacity: 0; }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulsePink {
+    0% {
+      box-shadow: inset 0 0 0 0 rgba(255, 105, 180, 0);
+      background-color: rgba(0, 0, 0, 0.75);
+    }
+    50% {
+      box-shadow: inset 0 0 150px 80px rgba(255, 105, 180, 1);
+      background-color: rgba(255, 105, 180, 0.3);
+    }
+    100% {
+      box-shadow: inset 0 0 0 0 rgba(255, 105, 180, 0);
+      background-color: rgba(0, 0, 0, 0.75);
+    }
+  }
+
+  @keyframes pulseRed {
+    0% {
+      box-shadow: inset 0 0 0 0 rgba(220, 53, 69, 0);
+      background-color: rgba(0, 0, 0, 0.75);
+    }
+    50% {
+      box-shadow: inset 0 0 150px 80px rgba(220, 53, 69, 1);
+      background-color: rgba(220, 53, 69, 0.3);
+    }
+    100% {
+      box-shadow: inset 0 0 0 0 rgba(220, 53, 69, 0);
+      background-color: rgba(0, 0, 0, 0.75);
+    }
+  }
+
+  .pulse-pink {
+    animation: pulsePink 0.8s ease;
+  }
+  .pulse-red {
+    animation: pulseRed 0.8s ease;
+  }
+
+  /* Persistent bright backgrounds during animation */
+  .bg-pink {
+    background-color: #ff69b4 !important;
+  }
+  .bg-red {
+    background-color: #dc3545 !important;
+  }
+
+  .animate-in {
+    animation: fadeInUp 0.5s ease-out;
+  }
+  .animate-left {
+    animation: slideOutLeft 0.5s forwards;
+  }
+  .animate-right {
+    animation: slideOutRight 0.5s forwards;
+  }
+
+  .audio-bio-label {
+    font-size: 1.1rem;
+    color: #ff69b4;
+  }
+
+  .audio-bio-player {
+    width: 250px;
+    height: 32px;
+    display: block;
+  }
+
+  .text-light, .fst-italic {
+    font-size: 1.05rem;
+  }
+
+  h1, .display-5 {
+    font-size: 2.75rem;
+  }
 </style>
 
 <div class="container py-5">
   {% if profile %}
-  <div class="bg-dark rounded-4 shadow-lg p-4 p-md-5">
+  <div id="profile-card" class="rounded-4 shadow-lg p-4 p-md-5 mx-auto animate-in"
+     style="background-color: rgba(0, 0, 0, 0.75); max-width: 50vw;">
     <div class="row g-5 align-items-center">
-
-      <!-- Left: Profile Photo + Buttons -->
       <div class="col-md-5 text-center position-relative">
-        <div class="rounded-4 shadow overflow-hidden mx-auto" style="width: 100%; max-width: 450px; aspect-ratio: 1/1; background: url('{% if profile.profile_photo %}{{ profile.profile_photo.url }}{% else %}/static/images/default-avatar.jpg{% endif %}') center / cover no-repeat;">
+        <div class="rounded-4 shadow overflow-hidden mx-auto"
+             style="width: 100%; max-width: 450px; aspect-ratio: 1/1; background: url('{% if profile.profile_photo %}{{ profile.profile_photo.url }}{% else %}/static/images/default-avatar.jpg{% endif %}') center / cover no-repeat;">
         </div>
 
         <div class="d-flex justify-content-center gap-4 mt-4">
-          <button type="button" class="btn btn-outline-danger rounded-circle" style="width: 80px; height: 80px;"
+          <button id="btn-pass" type="button" class="btn btn-outline-danger rounded-circle d-flex justify-content-center align-items-center" style="width: 80px; height: 80px;"
             onclick="passProfile({{ profile.id }});" title="Pass">
             <i class="fas fa-times fa-2x"></i>
           </button>
-          <button type="button" class="btn btn-outline-pink rounded-circle" style="width: 80px; height: 80px;"
+          <button id="btn-like" type="button" class="btn btn-outline-pink rounded-circle d-flex justify-content-center align-items-center" style="width: 80px; height: 80px;"
             onclick="likeProfile({{ profile.id }});" title="Like">
             <i class="fas fa-heart fa-2x"></i>
           </button>
         </div>
       </div>
 
-      <!-- Right: Profile Info -->
       <div class="col-md-7 text-light">
         <h1 class="text-pink display-5 fw-bold mb-3">{{ profile.name }}, {{ profile.age }}</h1>
 
@@ -72,12 +156,13 @@
         </div>
 
         {% if profile.bio %}
-          <p class="fst-italic text-muted mb-4">{{ profile.bio }}</p>
+          <p class="fst-italic mb-4">{{ profile.bio }}</p>
         {% endif %}
 
         {% if profile.audio_bio %}
           <div class="mb-4">
-            <audio controls class="w-100" id="audioBio" autoplay muted>
+            <div class="audio-bio-label mb-2">🎵 <strong>Audio Bio:</strong></div>
+            <audio controls id="audioBio" class="audio-bio-player" autoplay muted>
               <source src="{{ profile.audio_bio.url }}" type="audio/mpeg">
               Your browser does not support the audio element.
             </audio>
@@ -92,6 +177,21 @@
                 <span class="interest-bubble">{{ interest }}</span>
               {% endfor %}
             </div>
+          </div>
+        {% endif %}
+
+        {% if profile.social_links %}
+          <div class="mt-4">
+            <strong class="text-pink">Social Links:</strong>
+            <ul class="list-unstyled mt-2">
+              {% for key, value in profile.social_links.items %}
+                <li>
+                  <i class="fas fa-link text-pink me-1"></i>
+                  <strong>{{ key|capfirst }}:</strong>
+                  <a href="" target="_blank" class="text-decoration-underline text-light">{{ value }}</a>
+                </li>
+              {% endfor %}
+            </ul>
           </div>
         {% endif %}
       </div>
@@ -123,9 +223,19 @@ function getCookie(name) {
   return cookieValue;
 }
 
+function restartAnimation(el, className) {
+  el.classList.remove(className);
+  void el.offsetWidth;
+  el.classList.add(className);
+}
+
 function likeProfile(profileId) {
-  const card = document.querySelector('.bg-dark') || document.body;
-  card.style.opacity = '0.5';
+  const body = document.body;
+  body.classList.add('bg-pink'); // Add persistent pink background
+  restartAnimation(body, 'pulse-pink');
+
+  const profileCard = document.getElementById('profile-card');
+  if (profileCard) profileCard.classList.add('animate-right');
 
   fetch('{% url "matching:like_profile" %}', {
     method: 'POST',
@@ -137,28 +247,42 @@ function likeProfile(profileId) {
   })
   .then(response => response.json())
   .then(data => {
-    if (data.success) {
-      if (data.is_match && data.match_data) {
-        if (window.showMatchNotification) window.showMatchNotification(data.match_data);
-        setTimeout(loadNextProfile, 1000);
+    setTimeout(() => {
+      if (data.success) {
+        if (data.is_match && data.match_data) {
+          if (window.showMatchNotification) window.showMatchNotification(data.match_data);
+          setTimeout(() => {
+            body.classList.remove('bg-pink'); // Remove after done
+            loadNextProfile();
+          }, 1000);
+        } else {
+          body.classList.remove('bg-pink');
+          loadNextProfile();
+        }
       } else {
-        loadNextProfile();
+        alert('Error: ' + data.error);
+        profileCard?.classList.remove('animate-right');
+        body.classList.remove('pulse-pink');
+        body.classList.remove('bg-pink');
       }
-    } else {
-      alert('Error: ' + data.error);
-      card.style.opacity = '1';
-    }
+    }, 400);
   })
   .catch(error => {
     console.error('Error:', error);
     alert('An error occurred. Please try again.');
-    card.style.opacity = '1';
+    profileCard?.classList.remove('animate-right');
+    body.classList.remove('pulse-pink');
+    body.classList.remove('bg-pink');
   });
 }
 
 function passProfile(profileId) {
-  const card = document.querySelector('.bg-dark') || document.body;
-  card.style.opacity = '0.5';
+  const body = document.body;
+  body.classList.add('bg-red'); // Add persistent red background
+  restartAnimation(body, 'pulse-red');
+
+  const profileCard = document.getElementById('profile-card');
+  if (profileCard) profileCard.classList.add('animate-left');
 
   fetch('{% url "matching:pass_profile" %}', {
     method: 'POST',
@@ -170,17 +294,24 @@ function passProfile(profileId) {
   })
   .then(response => response.json())
   .then(data => {
-    if (data.success) {
-      loadNextProfile();
-    } else {
-      alert('Error: ' + data.error);
-      card.style.opacity = '1';
-    }
+    setTimeout(() => {
+      if (data.success) {
+        body.classList.remove('bg-red');
+        loadNextProfile();
+      } else {
+        alert('Error: ' + data.error);
+        profileCard?.classList.remove('animate-left');
+        body.classList.remove('pulse-red');
+        body.classList.remove('bg-red');
+      }
+    }, 400);
   })
   .catch(error => {
     console.error('Error:', error);
     alert('An error occurred. Please try again.');
-    card.style.opacity = '1';
+    profileCard?.classList.remove('animate-left');
+    body.classList.remove('pulse-red');
+    body.classList.remove('bg-red');
   });
 }
 
@@ -208,14 +339,11 @@ window.addEventListener('DOMContentLoaded', () => {
     const playPromise = audio.play();
     if (playPromise !== undefined) {
       playPromise.catch(error => {
-        console.log('Autoplay blocked:', error);
-
         const tryPlay = () => {
           audio.play().catch(() => {});
           document.removeEventListener('mousemove', tryPlay);
           document.removeEventListener('keydown', tryPlay);
         };
-
         document.addEventListener('mousemove', tryPlay);
         document.addEventListener('keydown', tryPlay);
       });

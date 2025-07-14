@@ -5,6 +5,9 @@ from .models import Profile
 from django.urls import reverse
 import os
 from dotenv import load_dotenv
+import json
+
+load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")  # Replace with your actual Google Maps API key
 
@@ -46,14 +49,31 @@ def create_profile_view(request):
         "Reading", "Travel", "Cooking", "Fitness", "Movies"
     ]
 
+    social_labels = ["Email", "Discord", "Instagram", "X"]  # doplnené pre šablónu
+
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES)
         if form.is_valid():
             profile = form.save(commit=False)
             profile.user = request.user
             profile.is_public = True
+
+            # Clean and save interests manually
+            interests_str = request.POST.get('interests', '')
+            interests_list = [i.strip().lower() for i in interests_str.split(",") if i.strip()]
+            profile.interests = ",".join(interests_list)
+
+            # Optional: parse social_links JSON string if needed
+            social_links_json = request.POST.get('social_links', '{}')
+            try:
+                social_links = json.loads(social_links_json)
+                profile.social_links = social_links
+            except Exception:
+                profile.social_links = {}
+
             profile.save()
             return redirect('profiles:profile_me')
+
     else:
         form = ProfileForm()
 
@@ -61,7 +81,10 @@ def create_profile_view(request):
         'form': form,
         'GOOGLE_API_KEY': GOOGLE_API_KEY,
         'premade_interests': premade_interests,
+        'social_labels': social_labels,  # doplnené pre použitie v šablóne
     })
+
+
 @login_required
 def edit_profile_view(request):
     try:
@@ -74,6 +97,8 @@ def edit_profile_view(request):
         "Reading", "Travel", "Cooking", "Fitness", "Movies"
     ]
 
+    social_labels = ["Email", "Discord", "Instagram", "X"]
+
     current_interests = []
     if profile.interests:
         current_interests = [i.strip().lower() for i in profile.interests.split(",") if i.strip()]
@@ -82,10 +107,18 @@ def edit_profile_view(request):
         form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             profile = form.save(commit=False)
-            # Save interests as a clean comma-separated lowercase string
+
             interests_str = request.POST.get('interests', '')
             interests_list = [i.strip().lower() for i in interests_str.split(",") if i.strip()]
             profile.interests = ",".join(interests_list)
+
+            social_links_json = request.POST.get('social_links', '{}')
+            try:
+                social_links = json.loads(social_links_json)
+                profile.social_links = social_links
+            except Exception:
+                profile.social_links = {}
+
             profile.is_public = True
             profile.save()
             return redirect('profiles:profile_me')
@@ -96,6 +129,7 @@ def edit_profile_view(request):
         'form': form,
         'premade_interests': premade_interests,
         'current_interests': current_interests,
+        'social_labels': social_labels,
         'GOOGLE_API_KEY': GOOGLE_API_KEY,
     }
     return render(request, 'edit_profile.html', context)

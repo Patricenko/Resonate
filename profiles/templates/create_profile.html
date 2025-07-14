@@ -1,11 +1,16 @@
 {% extends "base.html" %}
 {% load user_form_tags %}
-{% block title %}Create Profile - Dinter{% endblock %}
+{% block title %}Create Profile - Resonate{% endblock %}
 
 {% block content %}
+<style>
+    body {
+        background: #1a1a1a;
+    }
+</style>
 <div class="container my-5" style="max-width: 900px;">
   <div class="form-with-validation p-4">
-    <h2 class="mb-4 text-center text-pink">Create Your Dinter Profile</h2>
+    <h2 class="mb-4 text-center text-pink">Create Your Resonate Profile</h2>
     <form method="POST" enctype="multipart/form-data" novalidate>
       {% csrf_token %}
       <div class="row g-3">
@@ -28,13 +33,14 @@
                   </button>
                 {% endfor %}
               </div>
-              <input type="hidden" name="{{ field.name }}" id="id_interests" value="{{ field.value }}">
+              <input type="hidden" name="{{ field.name }}" id="id_interests" value="{{ field.value|default_if_none:'' }}">
               {% if field.errors %}
                 <div class="text-danger small mt-1">
                   {% for error in field.errors %}{{ error }}<br>{% endfor %}
                 </div>
               {% endif %}
             </div>
+
           {% elif field.name == 'profile_photo' %}
             <div class="col-12">
               <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
@@ -45,7 +51,8 @@
                 </div>
               {% endif %}
             </div>
-          {% elif field.name in 'bio social_links audio_bio' %}
+
+          {% elif field.name == 'bio' %}
             <div class="col-12">
               <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
               {{ field|add_class:"form-control" }}
@@ -55,6 +62,49 @@
                 </div>
               {% endif %}
             </div>
+
+          {% elif field.name == 'social_links' %}
+            <div class="col-12">
+              <label class="form-label">Social Links</label>
+              <div id="social-links-wrapper">
+                {% for label in social_labels %}
+                  <div class="mb-2">
+                    <label class="form-label">{{ label }}</label>
+                    <input type="text" class="form-control social-input" name="social_{{ label|lower }}" placeholder="Enter {{ label }}...">
+                  </div>
+                {% endfor %}
+                <div class="mb-2">
+                  <label class="form-label">Custom</label>
+                  <input type="text" class="form-control mb-1" id="custom-key" placeholder="Custom platform (e.g., Telegram)">
+                  <input type="text" class="form-control" id="custom-value" placeholder="Enter your handle or link">
+                  <button type="button" id="add-custom-social" class="btn btn-sm btn-outline-pink mt-2">Add Custom</button>
+                </div>
+              </div>
+              <input type="hidden" name="social_links" id="id_social_links">
+            </div>
+
+          {% elif field.name == 'location' %}
+            <div class="col-md-6">
+                <label for="autocomplete" class="form-label">Location</label>
+                <input id="autocomplete" type="text" class="form-control" placeholder="Enter your location" autocomplete="off">
+                <input type="hidden" name="location" id="id_location" value="{{ field.value|default_if_none:'' }}">
+                {% if field.errors %}
+                  <div class="text-danger small mt-1">
+                    {% for error in field.errors %}{{ error }}<br>{% endfor %}
+                  </div>
+                {% endif %}
+            </div>
+          {% elif field.name == 'audio_bio' %}
+            <div class="col-12">
+              <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+              {{ field|add_class:"form-control" }}
+              {% if field.errors %}
+                <div class="text-danger small mt-1">
+                  {% for error in field.errors %}{{ error }}<br>{% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
           {% else %}
             <div class="col-md-4">
               <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
@@ -89,39 +139,67 @@
   </div>
 </div>
 
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet"/>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    // INTEREST BUTTONS
+    // Social links logic
+    const socialInputs = document.querySelectorAll(".social-input");
+    const hiddenSocialField = document.getElementById("id_social_links");
+    const addCustomBtn = document.getElementById("add-custom-social");
+
+    function collectSocialLinks() {
+      const result = {};
+      socialInputs.forEach(input => {
+        const label = input.name.replace("social_", "");
+        const val = input.value.trim();
+        if (val) result[label] = val;
+      });
+
+      const customKey = document.getElementById("custom-key").value.trim();
+      const customVal = document.getElementById("custom-value").value.trim();
+      if (customKey && customVal) result[customKey] = customVal;
+
+      hiddenSocialField.value = JSON.stringify(result);
+    }
+
+    socialInputs.forEach(input => input.addEventListener("input", collectSocialLinks));
+    addCustomBtn.addEventListener("click", () => {
+      collectSocialLinks();
+      document.getElementById("custom-key").value = "";
+      document.getElementById("custom-value").value = "";
+    });
+
+    // Interest button toggle logic
     const buttons = document.querySelectorAll(".interest-button");
     const hiddenInput = document.getElementById("id_interests");
-    let selected = hiddenInput?.value ? hiddenInput.value.split(",").map(i => i.trim().toLowerCase()) : [];
+    let selected = hiddenInput.value ? hiddenInput.value.split(",") : [];
 
     buttons.forEach(btn => {
-      const val = btn.dataset.interest;
-      if (selected.includes(val)) {
-        btn.classList.add("selected", "btn-pink");
+      if (selected.includes(btn.dataset.interest)) {
+        btn.classList.add("btn-pink");
         btn.classList.remove("btn-outline-pink");
       }
+    });
 
-      btn.addEventListener("click", () => {
-        if (selected.includes(val)) {
-          selected = selected.filter(i => i !== val);
-          btn.classList.remove("selected", "btn-pink");
-          btn.classList.add("btn-outline-pink");
+    buttons.forEach(button => {
+      button.addEventListener("click", () => {
+        const interest = button.dataset.interest;
+        if (selected.includes(interest)) {
+          selected = selected.filter(i => i !== interest);
+          button.classList.remove("btn-pink");
+          button.classList.add("btn-outline-pink");
         } else {
-          selected.push(val);
-          btn.classList.add("selected", "btn-pink");
-          btn.classList.remove("btn-outline-pink");
+          selected.push(interest);
+          button.classList.add("btn-pink");
+          button.classList.remove("btn-outline-pink");
         }
         hiddenInput.value = selected.join(",");
       });
     });
 
-    // CROPPER LOGIC
+    // Cropper logic for profile photo
     const inputFile = document.querySelector('input[type="file"][name="profile_photo"]');
     const cropperModal = document.getElementById("cropper-modal");
     const cropperImage = document.getElementById("cropper-image");
@@ -131,33 +209,36 @@
 
     cropperModal.style.display = "none";
 
-    inputFile?.addEventListener("change", function () {
-      const file = this.files[0];
-      if (!file) {
-        cropperModal.style.display = "none";
-        return;
-      }
-      const url = URL.createObjectURL(file);
-      cropperImage.src = url;
+    if(inputFile) {
+      inputFile.addEventListener("change", function () {
+        const file = this.files[0];
+        if (!file) {
+          cropperModal.style.display = "none";
+          return;
+        }
+        const url = URL.createObjectURL(file);
+        cropperImage.src = url;
 
-      cropperModal.style.display = "flex";
-      if (cropper) cropper.destroy();
+        cropperModal.style.display = "flex";
 
-      cropper = new Cropper(cropperImage, {
-        aspectRatio: 1,
-        viewMode: 1,
-        movable: true,
-        zoomable: true,
-        rotatable: false,
-        scalable: false,
-        background: false,
-        autoCropArea: 1,
+        if (cropper) cropper.destroy();
+
+        cropper = new Cropper(cropperImage, {
+          aspectRatio: 1,
+          viewMode: 1,
+          movable: true,
+          zoomable: true,
+          rotatable: false,
+          scalable: false,
+          background: false,
+          autoCropArea: 1,
+        });
       });
-    });
+    }
 
     cropperCancel.addEventListener("click", () => {
       cropperModal.style.display = "none";
-      inputFile.value = "";
+      if(inputFile) inputFile.value = ""; // reset input if cancel
       if (cropper) {
         cropper.destroy();
         cropper = null;
@@ -172,10 +253,12 @@
         height: 400,
         imageSmoothingQuality: 'high'
       }).toBlob(blob => {
+        const fileInput = inputFile;
+
         const dataTransfer = new DataTransfer();
         const newFile = new File([blob], "cropped_profile_photo.png", { type: "image/png" });
         dataTransfer.items.add(newFile);
-        inputFile.files = dataTransfer.files;
+        fileInput.files = dataTransfer.files;
 
         cropperModal.style.display = "none";
         cropper.destroy();
@@ -183,30 +266,43 @@
       }, "image/png");
     });
   });
-</script>
 
-<!-- Google Maps JavaScript API with Places -->
-<script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_API_KEY }}&libraries=places" defer></script>
-<script type="module" src="https://unpkg.com/@googlemaps/places-autocomplete-element"></script>
-<script>
-  window.addEventListener('load', function () {
-    const input = document.getElementById('id_location');
-    if (!input) return;
+  // Google Maps Places Autocomplete callback
+  function initAutocomplete() {
+      const autocompleteInput = document.getElementById('autocomplete');
+      const hiddenLocation = document.getElementById('id_location');
 
-    const autocomplete = new google.maps.places.Autocomplete(input, {
-      types: ['geocode'],
-      componentRestrictions: { country: ['sk', 'cz'] }
-    });
+      const autocomplete = new google.maps.places.Autocomplete(autocompleteInput, {
+        types: ['geocode'],
+      });
 
-    autocomplete.addListener('place_changed', function () {
-      const place = autocomplete.getPlace();
-      if (!place.geometry) {
-        console.log("No geometry found for place:", place);
-        return;
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (!place.address_components) {
+          hiddenLocation.value = '';
+          return;
+        }
+
+        let city = '';
+        let country = '';
+
+        for (const component of place.address_components) {
+          const types = component.types;
+          if (types.includes("locality")) city = component.long_name;
+          if (types.includes("country")) country = component.long_name;
+        }
+
+        // Build address: skip postal code
+        const cleanLocation = `${city}${country ? ', ' + country : ''}`;
+        hiddenLocation.value = cleanLocation;
+        autocompleteInput.value = cleanLocation;
+      });
+
+      // Prefill autocomplete input if hidden field has a value
+      if (hiddenLocation.value) {
+        autocompleteInput.value = hiddenLocation.value;
       }
-      console.log("Selected place:", place.formatted_address);
-    });
-  });
+    }
 </script>
 
 <style>
@@ -237,4 +333,9 @@
     color: white !important;
   }
 </style>
+
+<!-- Google Maps API script -->
+<script
+  src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_API_KEY }}&libraries=places&callback=initAutocomplete"
+  async defer></script>
 {% endblock %}
