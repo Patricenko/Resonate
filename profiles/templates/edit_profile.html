@@ -341,43 +341,60 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
-// Google Maps Places Autocomplete callback
-function initAutocomplete() {
-  const autocompleteInput = document.getElementById('autocomplete');
-  const hiddenLocation = document.getElementById('id_location');
+  // Google Maps Places Autocomplete callback
+  function initAutocomplete() {
+      const autocompleteInput = document.getElementById('autocomplete');
+      const hiddenLocation = document.getElementById('id_location');
 
-  const autocomplete = new google.maps.places.Autocomplete(autocompleteInput, {
-    types: ['geocode'],
-  });
+      const autocomplete = new google.maps.places.Autocomplete(autocompleteInput, {
+        types: ['geocode'],
+      });
 
-  autocomplete.addListener('place_changed', () => {
-    const place = autocomplete.getPlace();
-    if (!place.address_components) {
-      hiddenLocation.value = '';
-      return;
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        if (!place.address_components) {
+          hiddenLocation.value = '';
+          return;
+        }
+        let city = '';
+        let country = '';
+
+        // Find country as before
+        for (const component of place.address_components) {
+          const types = component.types;
+          if (types.includes("country")) country = component.long_name;
+        }
+
+        // Find city from multiple possible types, fallback in order
+        const cityTypes = [
+          "locality",
+          "postal_town",             // UK/Europe sometimes
+          "administrative_area_level_2",  // US counties or cities
+          "administrative_area_level_1",  // US states sometimes
+          "sublocality_level_1",
+          "sublocality"
+        ];
+
+        for (const type of cityTypes) {
+          const comp = place.address_components.find(c => c.types.includes(type));
+          if (comp) {
+            city = comp.long_name;
+            break;
+          }
+        }
+
+        // Build final string
+        const cleanLocation = `${city}${country ? ', ' + country : ''}`;
+        hiddenLocation.value = cleanLocation;
+        autocompleteInput.value = cleanLocation;
+
+      });
+
+      // Prefill autocomplete input if hidden field has a value
+      if (hiddenLocation.value) {
+        autocompleteInput.value = hiddenLocation.value;
+      }
     }
-
-    let city = '';
-    let country = '';
-
-    for (const component of place.address_components) {
-      const types = component.types;
-      if (types.includes("locality")) city = component.long_name;
-      if (types.includes("country")) country = component.long_name;
-    }
-
-    // Build address: skip postal code
-    const cleanLocation = `${city}${country ? ', ' + country : ''}`;
-    hiddenLocation.value = cleanLocation;
-    autocompleteInput.value = cleanLocation;
-  });
-
-  // Prefill autocomplete input if hidden field has a value
-  if (hiddenLocation.value) {
-    autocompleteInput.value = hiddenLocation.value;
-  }
-}
-
 </script>
 
 <style>
