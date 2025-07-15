@@ -13,6 +13,19 @@ geopy==2.3.0
 # Production server (optional)
 gunicorn==21.2.0
 
+# WebSocket support and real-time features
+channels==4.0.0
+daphne==4.1.0
+
+# HTMX integration for dynamic content
+django-htmx==1.17.0
+
+# Short UUID generation for chat groups
+shortuuid==1.0.11
+
+# ASGI sync-to-async utilities (used by channels)
+asgiref==3.7.2
+
 # Development dependencies (optional)
 # Uncomment these for development
 # django-debug-toolbar==4.2.0

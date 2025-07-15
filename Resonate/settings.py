@@ -89,9 +89,9 @@ TEMPLATES = [
     },
 ]
 
-#WSGI_APPLICATION = 'Dinter.wsgi.application'
+#WSGI_APPLICATION = 'Resonate.wsgi.application'
 
-ASGI_APPLICATION = 'Dinter.asgi.application'
+ASGI_APPLICATION = 'Resonate.asgi.application'
 
 CHANNEL_LAYERS = {
     'default': {
@@ -99,7 +99,7 @@ CHANNEL_LAYERS = {
     }
 }
 
-ASGI_APPLICATION = 'Dinter.asgi.application'
+ASGI_APPLICATION = 'Resonate.asgi.application'
 
 CHANNEL_LAYERS = {
     'default': {
