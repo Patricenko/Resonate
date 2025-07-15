@@ -27,6 +27,7 @@ urlpatterns = [
     path('users/', include('users.urls', namespace='users')),
     path('profiles/', include('profiles.urls', namespace='profiles')),
     path('matching/', include('matching.urls', namespace='matching')),
+    path('rtchat/', include('rtchat.urls')),
     path('', index_view, name='index'),  # Homepage view
 ]
 

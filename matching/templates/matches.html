@@ -148,13 +148,25 @@
     {% if matches %}
         <div class="matches-grid">
             {% for match_data in matches %}
-                <div class="match-card{% if match_data.is_new %} new-match{% endif %}" 
-                     onclick="showProfilePopup({{ match_data.other_profile.id }})">
+                <div class="match-card{% if match_data.is_new %} new-match{% endif %}">
                     {% if match_data.is_new %}
                         <div class="new-match-badge">
                             <i class="fas fa-star"></i> NEW
                         </div>
                     {% endif %}
+                    <div class="match-actions position-absolute" style="top: 10px; left: 10px; z-index: 10;">
+                        <a href="{% url 'rtchat:get_or_create_chatroom' username=match_data.other_profile.user.username %}" 
+                           class="btn btn-sm btn-pink rounded-circle" 
+                           style="background-color: #ff69b4; color: white;"
+                           title="Message">
+                            <i class="fas fa-comment"></i>
+                        </a>
+                        <button class="btn btn-sm btn-dark rounded-circle ml-2" 
+                                onclick="showProfilePopup({{ match_data.other_profile.id }})"
+                                title="View Profile">
+                            <i class="fas fa-user"></i>
+                        </button>
+                    </div>
                     
                     <div class="match-image">
                         {% if match_data.other_profile.profile_photo %}
