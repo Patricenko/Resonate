@@ -1,0 +1,30 @@
+{% extends "notifications/emails/base_email.html" %}
+
+{% block content %}
+<h2>🎉 Congratulations, {{ user.first_name|default:user.username }}!</h2>
+
+<p>Amazing news! You have a new match on {{ site_name }}!</p>
+
+<div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
+    <h3>You matched with <span class="highlight">{{ matched_user.first_name|default:matched_user.username }}</span>! 💖</h3>
+    {% if matched_user.profile.profile_photo %}
+    <img src="{{ matched_user.profile.profile_photo.url }}" alt="Profile photo" style="width: 80px; height: 80px; border-radius: 50%; margin: 10px;">
+    {% endif %}
+    <p><strong>Age:</strong> {{ matched_user.profile.age }}</p>
+    <p><strong>Location:</strong> {{ matched_user.profile.location }}</p>
+    {% if matched_user.profile.interests %}
+    <p><strong>Interests:</strong> {{ matched_user.profile.interests }}</p>
+    {% endif %}
+</div>
+
+<p>This means you both liked each other's profiles! Why not start a conversation and see where it leads?</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="http://127.0.0.1:8000/matching/matches/" class="button">Start Chatting Now! 💬</a>
+</div>
+
+<p>Don't wait too long - good matches don't last forever! 😉</p>
+
+<p>Best of luck,<br>
+<strong>The {{ site_name }} Team</strong></p>
+{% endblock %}

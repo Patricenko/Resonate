@@ -1,0 +1,30 @@
+{% extends "notifications/emails/base_email.html" %}
+
+{% block content %}
+<h2>💖 Someone liked your profile, {{ user.first_name|default:user.username }}!</h2>
+
+<p>Great news! Your {{ site_name }} profile caught someone's attention!</p>
+
+<div style="background-color: #fff3e0; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
+    <h3><span class="highlight">{{ liker.first_name|default:liker.username }}</span> liked your profile! 👍</h3>
+    {% if liker.profile.profile_photo %}
+    <img src="{{ liker.profile.profile_photo.url }}" alt="Profile photo" style="width: 80px; height: 80px; border-radius: 50%; margin: 10px;">
+    {% endif %}
+    <p><strong>Age:</strong> {{ liker.profile.age }}</p>
+    <p><strong>Location:</strong> {{ liker.profile.location }}</p>
+    {% if liker.profile.interests %}
+    <p><strong>Interests:</strong> {{ liker.profile.interests }}</p>
+    {% endif %}
+</div>
+
+<p>Interested in {{ liker.first_name|default:liker.username }}? Check out their profile and see if you'd like to match!</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="http://127.0.0.1:8000/matching/" class="button">View Profile & Decide 👀</a>
+</div>
+
+<p>Remember, if you like them back, it's a match! 🎉</p>
+
+<p>Happy swiping,<br>
+<strong>The {{ site_name }} Team</strong></p>
+{% endblock %}

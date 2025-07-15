@@ -1,0 +1,37 @@
+{% extends "notifications/emails/base_email.html" %}
+
+{% block content %}
+<h2>🎉 Welcome to {{ site_name }}, {{ user.first_name|default:user.username }}!</h2>
+
+<p>We're thrilled to have you join our community of amazing people looking for meaningful connections!</p>
+
+<div style="background-color: #e8f5e8; padding: 20px; border-radius: 10px; margin: 20px 0;">
+    <h3>Here's what you can do on {{ site_name }}:</h3>
+    <ul style="text-align: left; display: inline-block;">
+        <li>🔍 <strong>Discover:</strong> Browse through profiles of interesting people</li>
+        <li>💖 <strong>Like:</strong> Show interest by liking profiles you find attractive</li>
+        <li>🎯 <strong>Match:</strong> When someone likes you back, it's a match!</li>
+        <li>💬 <strong>Chat:</strong> Start conversations with your matches</li>
+        <li>🎵 <strong>Audio Bio:</strong> Listen to voice messages to get to know people better</li>
+    </ul>
+</div>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="http://127.0.0.1:8000/matching/" class="button">Start Discovering Matches! 🚀</a>
+</div>
+
+<h3>💡 Pro Tips for Success:</h3>
+<ul style="text-align: left; margin: 20px 0;">
+    <li>Complete your profile with great photos and an interesting bio</li>
+    <li>Record an audio bio to stand out from the crowd</li>
+    <li>Be genuine and authentic in your interactions</li>
+    <li>Don't be afraid to make the first move!</li>
+</ul>
+
+<p>Your perfect match might be just a swipe away! 🥰</p>
+
+<p>If you have any questions or need help, don't hesitate to reach out to our support team.</p>
+
+<p>Welcome aboard and happy matching!<br>
+<strong>The {{ site_name }} Team</strong></p>
+{% endblock %}

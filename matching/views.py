@@ -6,6 +6,12 @@ from django.db.models import Q
 from profiles.models import Profile
 from .models import Like, Match, Pass
 import json
+from django.db.models import Case, When, Value, IntegerField
+from django.db.models import Sum
+from geopy.geocoders import Nominatim
+from geopy.distance import geodesic
+import googlemaps
+from django.conf import settings
 
 
 @login_required
@@ -24,6 +30,7 @@ def match_view(request):
         preferred_gender = current_profile.preferred_gender
         preferred_age_min = current_profile.preferred_age_min
         preferred_age_max = current_profile.preferred_age_max
+        interests = current_profile.interests.split(",") if current_profile.interests else []
     except Profile.DoesNotExist:
         # If user doesn't have a profile, redirect to create one
         return redirect('profiles:create_profile')
@@ -43,6 +50,75 @@ def match_view(request):
     if preferred_gender not in ['B', 'O']:  # Assuming B=both, O=other
         potential_matches = potential_matches.filter(gender=preferred_gender)
 
+    # location-filtering
+    # Filter by location/distance if user has location preferences
+    if hasattr(current_profile, 'location') and current_profile.location:
+        
+        # Initialize Google Maps client
+        gmaps = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
+        
+        try:
+            # Get coordinates for current user's location
+            current_location_result = gmaps.geocode(current_profile.location)
+            if current_location_result:
+                current_coords = (
+                    current_location_result[0]['geometry']['location']['lat'],
+                    current_location_result[0]['geometry']['location']['lng']
+                )
+                
+                # Filter profiles within preferred distance (e.g., 50km)
+                max_distance_km = getattr(current_profile, 'max_distance', 50)  # Default 50km
+                nearby_profiles = []
+                
+                for profile in potential_matches:
+                    if profile.location:
+                        try:
+                            profile_location_result = gmaps.geocode(profile.location)
+                            if profile_location_result:
+                                profile_coords = (
+                                    profile_location_result[0]['geometry']['location']['lat'],
+                                    profile_location_result[0]['geometry']['location']['lng']
+                                )
+                                distance = geodesic(current_coords, profile_coords).kilometers
+                                if distance <= max_distance_km:
+                                    nearby_profiles.append(profile.id)
+                        except Exception:
+                            continue
+                
+                potential_matches = potential_matches.filter(id__in=nearby_profiles)
+                # order by distance
+                potential_matches = potential_matches.annotate(
+                    distance=Sum(
+                        Case(
+                            When(id__in=nearby_profiles, then=Value(1)),
+                            default=Value(0),
+                            output_field=IntegerField()
+                        )
+                    )
+                ).order_by('distance')
+        except Exception:
+            # If geocoding fails, continue without location filtering
+            pass
+
+    # Order potential matches based on distance, interests
+    if interests:
+        interest_cases = []
+        for interest in interests:
+            interest_cases.append(
+                When(interests__icontains=interest.strip(), then=Value(1))
+            )
+        
+        potential_matches = potential_matches.annotate(
+            interest_match_score=Case(
+            *interest_cases,
+            default=Value(0),
+            output_field=IntegerField()
+            )
+        ).order_by('-interest_match_score', '?')
+    else:
+        # If no interests, order by creation date or randomly
+        potential_matches = potential_matches.order_by('?')
+
     # Get the first potential match
     next_profile = potential_matches.first()
 
@@ -60,31 +136,29 @@ def match_view(request):
     return render(request, 'match.html', context)
 
 
-
-
 @login_required
 def like_profile(request):
     """Handle liking a profile via AJAX"""
     if request.method == 'POST':
         data = json.loads(request.body)
         profile_id = data.get('profile_id')
-        
+
         try:
             liked_profile = Profile.objects.get(id=profile_id)
             liked_user = liked_profile.user
-            
+
             # Create the like
             like, created = Like.objects.get_or_create(
                 liker=request.user,
                 liked=liked_user
             )
-            
+
             # Check if there's a mutual like (match)
             mutual_like = Like.objects.filter(
                 liker=liked_user,
                 liked=request.user
             ).exists()
-            
+
             match_data = None
             is_match = False
             if mutual_like:
@@ -94,7 +168,7 @@ def like_profile(request):
                     user2=max(request.user, liked_user, key=lambda u: u.id)
                 )
                 is_match = match_created
-                
+
                 if match_created:
                     # Get match data for popup
                     match_data = {
@@ -106,17 +180,19 @@ def like_profile(request):
                             'age': liked_profile.age
                         }
                     }
-            
+                    # ➕ Store name for animation screen
+                    request.session['matched_user_name'] = liked_profile.name
+
             return JsonResponse({
                 'success': True,
                 'is_match': is_match,
                 'liked_user': liked_user.username,
                 'match_data': match_data
             })
-            
+
         except Profile.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Profile not found'})
-    
+
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 
@@ -285,3 +361,10 @@ def get_profile_popup(request, profile_id):
         
     except Profile.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Profile not found'})
+
+@login_required
+def matched_temp(request):
+    """Temporary animation screen after a successful match"""
+    matched_user_name = request.session.get('matched_user_name', None)
+    return render(request, 'matched.html', {'matched_user_name': matched_user_name})
+

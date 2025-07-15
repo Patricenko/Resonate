@@ -1,0 +1,55 @@
+{% extends "notifications/emails/base_email.html" %}
+
+{% block content %}
+<h2>📊 Your Daily Activity Summary, {{ user.first_name|default:user.username }}!</h2>
+
+<p>Here's what happened on {{ site_name }} in the last 24 hours:</p>
+
+<div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+    <h3>Your Recent Activity 🎯</h3>
+    
+    {% if activity.recent_matches > 0 %}
+    <div style="background-color: #d4edda; padding: 15px; border-radius: 8px; margin: 10px 0;">
+        <h4 style="color: #155724; margin: 0;">🎉 {{ activity.recent_matches }} New Match{{ activity.recent_matches|pluralize:"es" }}!</h4>
+        <p style="margin: 5px 0 0 0; color: #155724;">You've connected with {{ activity.recent_matches }} amazing people!</p>
+    </div>
+    {% endif %}
+
+    {% if activity.recent_likes > 0 %}
+    <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 10px 0;">
+        <h4 style="color: #856404; margin: 0;">💖 {{ activity.recent_likes }} New Like{{ activity.recent_likes|pluralize }}!</h4>
+        <p style="margin: 5px 0 0 0; color: #856404;">Your profile caught {{ activity.recent_likes }} person{{ activity.recent_likes|pluralize:"'s,s'" }} attention!</p>
+    </div>
+    {% endif %}
+
+    {% if activity.recent_matches == 0 and activity.recent_likes == 0 %}
+    <div style="background-color: #e2e3e5; padding: 15px; border-radius: 8px; margin: 10px 0;">
+        <h4 style="color: #6c757d; margin: 0;">🤔 Quiet Day</h4>
+        <p style="margin: 5px 0 0 0; color: #6c757d;">No new activity today, but that's about to change!</p>
+    </div>
+    {% endif %}
+</div>
+
+<h3>💡 Tips to Boost Your Profile:</h3>
+<ul style="text-align: left; margin: 20px 0;">
+    <li>🖼️ <strong>Update your photos:</strong> Fresh photos get more attention</li>
+    <li>🎵 <strong>Record an audio bio:</strong> Let your personality shine through</li>
+    <li>📝 <strong>Refresh your bio:</strong> Share something new about yourself</li>
+    <li>👀 <strong>Stay active:</strong> Regular swiping increases your visibility</li>
+</ul>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="http://127.0.0.1:8000/matching/" class="button">Start Swiping! 🚀</a>
+</div>
+
+<p>Your perfect match might be one swipe away! 💕</p>
+
+<p>Keep connecting,<br>
+<strong>The {{ site_name }} Team</strong></p>
+
+<hr style="margin: 30px 0;">
+<p style="font-size: 0.9em; color: #666;">
+    Don't want daily digests? You can adjust your notification preferences 
+    <a href="http://127.0.0.1:8000/notifications/preferences/" style="color: #e91e63;">here</a>.
+</p>
+{% endblock %}
