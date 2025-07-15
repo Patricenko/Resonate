@@ -14,7 +14,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
 from channels.auth import AuthMiddlewareStack
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Dinter.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Resonate.settings')
 
 django_asgi_app = get_asgi_application()
 from rtchat import routing
