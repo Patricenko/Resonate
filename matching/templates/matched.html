@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Matched!{% endblock %}
+
+{% block content %}
+<style>
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeIn 1.2s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<div class="d-flex align-items-center justify-content-center" style="height: 90vh;">
+  <div class="text-center fade-in">
+    <h1 class="display-4 mb-4">💖 You've resonated with <strong>{{ matched_user_name }}</strong>! 💖</h1>
+    <p class="lead">Redirecting to your matches...</p>
+    <audio id="matchSound" autoplay>
+      <source src="{% static 'sounds/match.mp3' %}" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+  </div>
+</div>
+
+
+<script>
+  // Ensure audio plays even if browser blocks autoplay
+  const matchSound = document.getElementById('matchSound');
+  matchSound.volume = 0.8;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const playAudio = () => {
+      matchSound.play().catch(() => {});
+      document.removeEventListener("click", playAudio);
+      document.removeEventListener("keydown", playAudio);
+    };
+
+    // In case autoplay fails, wait for user interaction
+    matchSound.play().catch(() => {
+      document.addEventListener("click", playAudio);
+      document.addEventListener("keydown", playAudio);
+    });
+  });
+
+  // Redirect after 3 seconds
+  setTimeout(() => {
+    window.location.href = "{% url 'matching:matches' %}";
+  }, 3000);
+</script>
+{% endblock %}

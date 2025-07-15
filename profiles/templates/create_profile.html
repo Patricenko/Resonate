@@ -282,20 +282,38 @@
           hiddenLocation.value = '';
           return;
         }
-
         let city = '';
         let country = '';
 
+        // Find country as before
         for (const component of place.address_components) {
           const types = component.types;
-          if (types.includes("locality")) city = component.long_name;
           if (types.includes("country")) country = component.long_name;
         }
 
-        // Build address: skip postal code
+        // Find city from multiple possible types, fallback in order
+        const cityTypes = [
+          "locality",
+          "postal_town",             // UK/Europe sometimes
+          "administrative_area_level_2",  // US counties or cities
+          "administrative_area_level_1",  // US states sometimes
+          "sublocality_level_1",
+          "sublocality"
+        ];
+
+        for (const type of cityTypes) {
+          const comp = place.address_components.find(c => c.types.includes(type));
+          if (comp) {
+            city = comp.long_name;
+            break;
+          }
+        }
+
+        // Build final string
         const cleanLocation = `${city}${country ? ', ' + country : ''}`;
         hiddenLocation.value = cleanLocation;
         autocompleteInput.value = cleanLocation;
+
       });
 
       // Prefill autocomplete input if hidden field has a value
