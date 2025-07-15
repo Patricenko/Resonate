@@ -56,12 +56,8 @@ INSTALLED_APPS = [
     'users',
     'profiles',
     'matching',
-<<<<<<<< HEAD:Dinter/settings.py
-    "rtchat",
-========
     'notifications',
     'rtchat',
->>>>>>>> origin/main:Resonate/settings.py
 ]
 
 MIDDLEWARE = [
@@ -93,10 +89,6 @@ TEMPLATES = [
     },
 ]
 
-<<<<<<<< HEAD:Dinter/settings.py
-#WSGI_APPLICATION = 'Dinter.wsgi.application'
-========
-
 #WSGI_APPLICATION = 'Dinter.wsgi.application'
 
 ASGI_APPLICATION = 'Dinter.asgi.application'
@@ -106,7 +98,6 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels.layers.InMemoryChannelLayer'
     }
 }
->>>>>>>> origin/main:Resonate/settings.py
 
 ASGI_APPLICATION = 'Dinter.asgi.application'
 

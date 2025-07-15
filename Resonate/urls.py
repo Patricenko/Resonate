@@ -27,10 +27,7 @@ urlpatterns = [
     path('users/', include('users.urls', namespace='users')),
     path('profiles/', include('profiles.urls', namespace='profiles')),
     path('matching/', include('matching.urls', namespace='matching')),
-<<<<<<<< HEAD:Dinter/urls.py
-========
     path('notifications/', include('notifications.urls')),
->>>>>>>> origin/main:Resonate/urls.py
     path('rtchat/', include('rtchat.urls')),
     path('', index_view, name='index'),  # Homepage view
 ]
