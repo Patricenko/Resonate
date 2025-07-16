@@ -1,1 +1,21 @@
-{% include 'rtchat/chat_message.html' %}
+{% load static %}
+{% include 'chat_message.html' %}
+{% if message.author == user %}
+<li class="flex justify-end mb-4 list-none">
+  <div class="chat-bubble-right">
+    <span>{{ message.body }}</span>
+  </div>
+</li>
+{% else %}
+<li class="flex flex-col mb-4 list-none">
+  <div class="flex items-end">
+    <svg height="16" width="10" class="chat-bubble-left-tail">
+      <path fill="white" d="M3,16L10,16L10,0.5C8,5.5,7.5,8.5,2,10.5C-1.5,11.5,1.5,16,3,16z"></path>
+    </svg>
+    <div class="chat-bubble-left">
+      <span>{{ message.body }}</span>
+    </div>
+  </div>
+  <small class="text-muted ml-12 mt-1">{{ message.author }}</small>
+</li>
+{% endif %}

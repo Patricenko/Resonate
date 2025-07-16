@@ -12,6 +12,7 @@ from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 import googlemaps
 from django.conf import settings
+from django.urls import reverse
 
 
 @login_required
@@ -326,18 +327,19 @@ def get_profile_popup(request, profile_id):
     """Get profile details for popup display"""
     try:
         profile = Profile.objects.get(id=profile_id)
-        
-        # Check if current user has interacted with this profile
+
         current_user = request.user
         has_liked = Like.objects.filter(liker=current_user, liked=profile.user).exists()
         has_passed = Pass.objects.filter(passer=current_user, passed=profile.user).exists()
-        
-        # Check if there's a mutual match
         is_match = Match.objects.filter(
-            Q(user1=current_user, user2=profile.user) | 
+            Q(user1=current_user, user2=profile.user) |
             Q(user1=profile.user, user2=current_user)
         ).exists()
-        
+
+        chat_url = None
+        if is_match:
+            chat_url = reverse('rtchat:get_or_create_chatroom', kwargs={'username': profile.user.username})
+
         profile_data = {
             'id': profile.id,
             'name': profile.name,
@@ -351,16 +353,18 @@ def get_profile_popup(request, profile_id):
             'has_liked': has_liked,
             'has_passed': has_passed,
             'is_match': is_match,
+            'chat_url': chat_url,
+            'username': profile.user.username,  # ✅ Add this line
             'gender': profile.get_gender_display()
         }
-        
         return JsonResponse({
             'success': True,
             'profile': profile_data
         })
-        
+
     except Profile.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Profile not found'})
+
 
 @login_required
 def matched_temp(request):

@@ -1,106 +1,200 @@
 {% extends 'base.html' %}
 {% block content %}
-<wrapper class="block max-w-2xl mx-auto my-10 px-6">
-    <div id="chat_window" class="h-[45rem] flex flex-col bg-gray-800 rounded-2xl shadow-2xl relative p-1">
-        <div class="flex justify-center text-emerald-400 bg-gray-800 p-2 sticky top-0 z-10">
-            <span id="online-count" class="pr-1">3</span> online
-        </div>
+<style>
+  /* Chat window background */
+  #chat_window {
+    height: 70vh;
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(43, 14, 43, 0.85);
+    border: 2px solid #ff69b4;
+    border-radius: 16px;
+    box-shadow: 0 0 20px #ff69b4aa;
+  }
 
-        <div id='chat_container' class="overflow-y-auto grow">
-            <ul id='chat_messages' class="flex flex-col justify-end gap-2 p-4">
-                {% for message in chat_messages reversed %}
-                    {% include 'rtchat/partials/chat_message_p.html' with message=message user=request.user %}
-                {% endfor %}
-            </ul>
-        </div>
+  /* Scroll container */
+  #chat_container {
+    overflow-y: auto;
+    flex-grow: 1;
+    padding: 1rem 0.5rem;
+  }
 
-        <div class="sticky bottom-0 z-10 p-2 bg-gray-800">
-            <div class="flex items-center rounded-xl px-2 py-2">
-                <form id="chat_message_form" class="w-full flex gap-2" 
-                    hx-ext="ws" 
-                    ws-connect="/ws/chat/{{group_name}}/"
-                    ws-send
-                    hx-swap="none"
-                    _="on htmx:beforeSend reset() me" >
-                    <input type="text" 
-                           name="message" 
-                           class="flex-grow px-3 py-2 rounded-lg bg-gray-700 text-white focus:outline-none" 
-                           placeholder="Type a message..." 
-                           required>
-                    <button type="submit" 
-                            class="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-400">
-                        Send
-                    </button>
-                </form>
-            </div>
-        </div>
+  ul#chat_messages {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Chat bubbles */
+  .chat-bubble-left,
+  .chat-bubble-right {
+    padding: 1rem 2rem;
+    max-width: 70%;
+    font-size: 1.25rem;
+    border-radius: 2rem;
+    line-height: 1.4;
+    word-wrap: break-word;
+    box-shadow: 0 0 12px rgba(255, 105, 180, 0.7);
+    background: linear-gradient(135deg, #ff69b4, #764ba2);
+    color: white;
+  }
+
+  /* Left bubble specifics */
+  .chat-bubble-left {
+    border-bottom-left-radius: 0;
+    align-self: flex-start;
+    position: relative;
+  }
+
+  /* Tail for left bubble */
+  .chat-bubble-left-tail {
+    margin-right: -6px;
+    margin-bottom: 8px;
+    fill: #ff69b4; /* matching pink fill */
+  }
+
+  /* Right bubble specifics */
+  .chat-bubble-right {
+    border-bottom-right-radius: 0;
+    align-self: flex-end;
+  }
+
+  /* List item flex styling */
+  li.flex {
+    display: flex;
+  }
+  li.justify-end {
+    justify-content: flex-end;
+  }
+  li.flex-col {
+    flex-direction: column;
+  }
+  li.list-none {
+    list-style-type: none;
+  }
+  li.mb-4 {
+    margin-bottom: 1rem;
+  }
+
+  /* Username below messages */
+  small.text-muted {
+    color: #ddd;
+    margin-left: 3rem;
+  }
+
+  /* Input and send button */
+  form#chat_message_form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  input.form-control {
+    background-color: #2a2a2a;
+    border: none;
+    color: white;
+    border-radius: 9999px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.1rem;
+    flex-grow: 1;
+    outline: none;
+  }
+
+  input.form-control::placeholder {
+    color: #bbb;
+  }
+
+  button.send-btn {
+    background: linear-gradient(45deg, #ff69b4, #764ba2);
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #ff69b4aa;
+    transition: all 0.2s ease;
+  }
+  button.send-btn:hover,
+  button.send-btn:focus {
+    background: linear-gradient(45deg, #764ba2, #ff69b4);
+    box-shadow: 0 0 14px #ff69b4ee;
+    outline: none;
+  }
+</style>
+
+<main class="container mt-4">
+  <div id="chat_window" class="chat-card card shadow p-3">
+    <div class="text-center text-pink border-bottom pb-2">
+      <span id="online-count">3</span> online
     </div>
-</wrapper>
 
-<!-- HTMX and WebSocket Extension -->
+    <div id="chat_container">
+      <ul id="chat_messages">
+        {% for message in chat_messages reversed %}
+          {% include 'rtchat/partials/chat_message_p.html' with message=message user=request.user %}
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="pt-2 border-top">
+      <form id="chat_message_form"
+            hx-ext="ws"
+            ws-connect="/ws/chat/{{group_name}}/"
+            ws-send
+            hx-swap="none"
+            _="on htmx:beforeSend reset() me">
+
+        <input type="text" name="message" class="form-control bg-dark text-white rounded-pill px-4 py-2" placeholder="Type a message..." required>
+
+        <button type="submit" class="send-btn rounded-pill px-4 py-2">
+          ➤
+        </button>
+      </form>
+    </div>
+  </div>
+</main>
+
 <script src="https://unpkg.com/htmx.org@1.9.2"></script>
 <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
 <script>
-    document.addEventListener('htmx:wsConnecting', function(evt) {
-        console.log('Connecting to WebSocket...');
-    });
-    
-    document.addEventListener('htmx:wsConnected', function(evt) {
-        console.log('Connected to WebSocket');
-    });
+  document.addEventListener('htmx:wsAfterMessage', function(evt) {
+    if (!evt.detail.message) return;
+    const data = JSON.parse(evt.detail.message);
+    if (data.room_name && data.room_name !== '{{ group_name }}') return;
 
-    document.addEventListener('htmx:wsAfterMessage', function(evt) {
-        if (!evt.detail.message) return;
-        console.log('Received WebSocket message:', evt.detail.message);
-        const data = JSON.parse(evt.detail.message);
-        
-        // Check if the message is for this room
-        if (data.room_name && data.room_name !== '{{ group_name }}') {
-            return;
-        }
-        
-        const messageList = document.getElementById('chat_messages');
-        const currentUser = '{{ request.user.username }}';
-        
-        const li = document.createElement('li');
-        if (data.username === currentUser) {
-            li.className = 'flex justify-end mb-4';
-            li.innerHTML = `
-                <div class="bg-green-200 rounded-l-lg rounded-tr-lg p-4 max-w-[75%]">
-                    <span>${data.message}</span>
-                </div>
-                <div class="flex items-end">
-                    <svg height="13" width="8">
-                        <path fill="#bbf7d0" d="M6.3,10.4C1.5,8.7,0.9,5.5,0,0.2L0,13l5.2,0C7,13,9.6,11.5,6.3,10.4z"/>
-                    </svg>
-                </div>`;
-        } else {
-            li.innerHTML = `
-                <div class="flex justify-start">
-                    <div class="flex items-end">
-                        <svg height="13" width="8">
-                            <path fill="white" d="M2.8,13L8,13L8,0.2C7.1,5.5,6.5,8.7,1.7,10.4C-1.6,11.5,1,13,2.8,13z"></path>
-                        </svg>
-                    </div>
-                    <div class="bg-white p-4 max-w-[75%] rounded-r-lg rounded-tl-lg">
-                        <span>${data.message}</span>
-                    </div>
-                </div>
-                <div class="text-sm font-light py-1 ml-10">
-                    <span class="text-white">${data.username}</span>
-                    <span class="text-gray-400">${data.username}</span>
-                </div>`;
-        }
-        
-        messageList.appendChild(li);
-        
-        // Scroll to bottom
-        const chatContainer = document.getElementById('chat_container');
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-    });
+    const messageList = document.getElementById('chat_messages');
+    const currentUser = '{{ request.user.username }}';
 
-    document.addEventListener('htmx:wsError', function(evt) {
-        console.error('WebSocket error:', evt.detail);
-    });
+    const li = document.createElement('li');
+    li.classList.add('mb-4', 'list-none');
+
+    if (data.username === currentUser) {
+      li.classList.add('flex', 'justify-end');
+      li.innerHTML = `
+        <div class="chat-bubble-right">
+          <span>${data.message}</span>
+        </div>`;
+    } else {
+      li.classList.add('flex', 'flex-col');
+      li.innerHTML = `
+        <div class="flex items-end">
+          <svg height="16" width="10" class="chat-bubble-left-tail" style="margin-right: -6px; margin-bottom: 8px;">
+            <path fill="#ff69b4" d="M3,16L10,16L10,0.5C8,5.5,7.5,8.5,2,10.5C-1.5,11.5,1.5,16,3,16z"></path>
+          </svg>
+          <div class="chat-bubble-left">
+            <span>${data.message}</span>
+          </div>
+        </div>
+        <small class="text-muted ml-12 mt-1">${data.username}</small>`;
+    }
+
+    messageList.appendChild(li);
+    const chatContainer = document.getElementById('chat_container');
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  });
 </script>
 {% endblock %}
