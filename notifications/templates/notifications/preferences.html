@@ -26,55 +26,49 @@
                             Choose which email notifications you'd like to receive from Resonate.
                         </p>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" id="email_on_match" 
-                                           name="email_on_match" {% if preferences.email_on_match %}checked{% endif %}>
-                                    <label class="form-check-label" for="email_on_match">
-                                        <strong>🎉 New Matches</strong>
-                                        <br><small class="text-muted">Get notified when you have a new match</small>
-                                    </label>
-                                </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="email_on_match" 
+                                   name="email_on_match" {% if preferences.email_on_match %}checked{% endif %}>
+                            <label class="form-check-label" for="email_on_match">
+                                <strong>🎉 New Matches</strong>
+                                <br><small class="text-muted">Get notified when you have a new match</small>
+                            </label>
+                        </div>
 
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" id="email_on_like" 
-                                           name="email_on_like" {% if preferences.email_on_like %}checked{% endif %}>
-                                    <label class="form-check-label" for="email_on_like">
-                                        <strong>💖 Profile Likes</strong>
-                                        <br><small class="text-muted">Get notified when someone likes your profile</small>
-                                    </label>
-                                </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="email_on_like" 
+                                   name="email_on_like" {% if preferences.email_on_like %}checked{% endif %}>
+                            <label class="form-check-label" for="email_on_like">
+                                <strong>💖 Profile Likes</strong>
+                                <br><small class="text-muted">Get notified when someone likes your profile</small>
+                            </label>
+                        </div>
 
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" id="daily_digest" 
-                                           name="daily_digest" {% if preferences.daily_digest %}checked{% endif %}>
-                                    <label class="form-check-label" for="daily_digest">
-                                        <strong>📊 Daily Digest</strong>
-                                        <br><small class="text-muted">Get a daily summary of your activity</small>
-                                    </label>
-                                </div>
-                            </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="email_on_message" 
+                                   name="email_on_message" {% if preferences.email_on_message %}checked{% endif %}>
+                            <label class="form-check-label" for="email_on_message">
+                                <strong>💬 New Messages</strong>
+                                <br><small class="text-muted">Get notified about new messages</small>
+                            </label>
+                        </div>
 
-                            <div class="col-md-6">
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" id="email_on_message" 
-                                           name="email_on_message" {% if preferences.email_on_message %}checked{% endif %}>
-                                    <label class="form-check-label" for="email_on_message">
-                                        <strong>💬 New Messages</strong>
-                                        <br><small class="text-muted">Get notified about new messages</small>
-                                    </label>
-                                </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="email_on_profile_view" 
+                                   name="email_on_profile_view" {% if preferences.email_on_profile_view %}checked{% endif %}>
+                            <label class="form-check-label" for="email_on_profile_view">
+                                <strong>👁️ Profile Views</strong>
+                                <br><small class="text-muted">Get notified when someone views your profile</small>
+                            </label>
+                        </div>
 
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" id="email_on_profile_view" 
-                                           name="email_on_profile_view" {% if preferences.email_on_profile_view %}checked{% endif %}>
-                                    <label class="form-check-label" for="email_on_profile_view">
-                                        <strong>👁️ Profile Views</strong>
-                                        <br><small class="text-muted">Get notified when someone views your profile</small>
-                                    </label>
-                                </div>
-                            </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="daily_digest" 
+                                   name="daily_digest" {% if preferences.daily_digest %}checked{% endif %}>
+                            <label class="form-check-label" for="daily_digest">
+                                <strong>📊 Daily Digest</strong>
+                                <br><small class="text-muted">Get a daily summary of your activity</small>
+                            </label>
                         </div>
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
@@ -114,6 +108,8 @@
         </div>
     </div>
 </div>
+
+
 
 <script>
 function sendTestEmail(type) {
