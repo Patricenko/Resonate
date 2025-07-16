@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import Http404
 # Create your tests here.
 
+app_name = 'rtchat'
+
 def chat_view(request, group_name='public2'):
     chat_group = get_object_or_404(ChatGroup, group_name = group_name)
     chat_messages = chat_group.chat_messages.all()[:]

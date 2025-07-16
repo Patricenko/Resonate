@@ -290,7 +290,7 @@
 
         let actionsHtml = '';
         if (profile.is_match) {
-          actionsHtml = `<button class="btn btn-success w-100"><i class="fas fa-comment me-2"></i>Message</button>`;
+          actionsHtml = `<a href="${profile.chat_url}" class="btn btn-success w-100"><i class="fas fa-comment me-2"></i>Message</a>`;
         } else if (!profile.has_liked && !profile.has_passed) {
           actionsHtml = `
             <button class="btn btn-outline-danger me-2 flex-grow-1" onclick="passProfileFromPopup(${profile.id})">
