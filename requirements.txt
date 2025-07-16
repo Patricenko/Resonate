@@ -1,21 +1,27 @@
 # Django Web Framework
 Django==5.2.4
+# Database adapter for PostgreSQL (optional)
+psycopg2-binary==2.9.9
 
 # Environment variables management
 python-dotenv==1.0.0
 
 # Image processing for ImageField
-Pillow==10.0.0
+Pillow==11.3.0
 
 # Geolocation services
 geopy==2.3.0
 
 # Production server (optional)
-gunicorn==21.2.0
+gunicorn==23.0.0
 
 # WebSocket support and real-time features
+# WebSocket support for Redis channel layer
+channels-redis==4.1.0
+django-htmx  ==1.17.0
 channels==4.0.0
 daphne==4.1.0
+shortuuid==1.0.11
 
 # HTMX integration for dynamic content
 django-htmx==1.17.0

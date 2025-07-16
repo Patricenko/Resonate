@@ -1,16 +1,29 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 from .models import Profile
 import mimetypes
 
 class ProfileForm(forms.ModelForm):
+    email = forms.EmailField(
+        max_length=254,
+        help_text='Enter a valid email address.',
+        widget=forms.EmailInput(attrs={'class': 'form-control'})
+    )
+    
     class Meta:
         model = Profile
         fields = '__all__'  # alebo vymenuj konkrétne polia, ak chceš
         exclude = ['user']
 
     def __init__(self, *args, **kwargs):
+        # Extract user instance if provided
+        self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+
+        # If we have a user instance, set the email field's initial value
+        if self.user:
+            self.fields['email'].initial = self.user.email
 
         # Vlastné úpravy vzhľadu a atribútov polí
         self.fields['location'].widget.attrs.update({
@@ -82,3 +95,17 @@ class ProfileForm(forms.ModelForm):
                 raise ValidationError('Image file size must be less than 5MB.')
         
         return image_file
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            # Check if email is already taken by another user
+            if self.user:
+                # Editing existing profile - exclude current user from check
+                if User.objects.filter(email=email).exclude(id=self.user.id).exists():
+                    raise ValidationError('This email address is already in use.')
+            else:
+                # Creating new profile
+                if User.objects.filter(email=email).exists():
+                    raise ValidationError('This email address is already in use.')
+        return email

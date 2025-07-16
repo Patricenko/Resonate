@@ -52,11 +52,17 @@ def create_profile_view(request):
     social_labels = ["Email", "Discord", "Instagram", "X"]  # doplnené pre šablónu
 
     if request.method == 'POST':
-        form = ProfileForm(request.POST, request.FILES)
+        form = ProfileForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             profile = form.save(commit=False)
             profile.user = request.user
             profile.is_public = True
+
+            # Update user's email
+            email = form.cleaned_data.get('email')
+            if email:
+                request.user.email = email
+                request.user.save()
 
             # Clean and save interests manually
             interests_str = request.POST.get('interests', '')
@@ -75,7 +81,7 @@ def create_profile_view(request):
             return redirect('profiles:profile_me')
 
     else:
-        form = ProfileForm()
+        form = ProfileForm(user=request.user)
 
     return render(request, 'create_profile.html', {
         'form': form,
@@ -104,9 +110,15 @@ def edit_profile_view(request):
         current_interests = [i.strip().lower() for i in profile.interests.split(",") if i.strip()]
 
     if request.method == 'POST':
-        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        form = ProfileForm(request.POST, request.FILES, instance=profile, user=request.user)
         if form.is_valid():
             profile = form.save(commit=False)
+
+            # Update user's email
+            email = form.cleaned_data.get('email')
+            if email:
+                request.user.email = email
+                request.user.save()
 
             interests_str = request.POST.get('interests', '')
             interests_list = [i.strip().lower() for i in interests_str.split(",") if i.strip()]
@@ -123,7 +135,7 @@ def edit_profile_view(request):
             profile.save()
             return redirect('profiles:profile_me')
     else:
-        form = ProfileForm(instance=profile)
+        form = ProfileForm(instance=profile, user=request.user)
 
     context = {
         'form': form,
