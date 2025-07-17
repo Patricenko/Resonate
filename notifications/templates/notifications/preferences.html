@@ -223,67 +223,9 @@
 
           <hr class="my-4 border-light">
 
-          <div class="test-email-section">
-            <h5>Test Email Notifications</h5>
-            <p class="form-description">Send yourself test emails to see how they look:</p>
-
-            <div class="test-email-buttons">
-              <div>
-                <button class="btn btn-outline-secondary" type="button" onclick="sendTestEmail('welcome')">
-                  📧 Test Welcome Email
-                </button>
-                <button class="btn btn-outline-secondary" type="button" onclick="sendTestEmail('match')">
-                  🎉 Test Match Email
-                </button>
-              </div>
-              <div>
-                <button class="btn btn-outline-secondary" type="button" onclick="sendTestEmail('like')">
-                  💖 Test Like Email
-                </button>
-                <button class="btn btn-outline-secondary" type="button" onclick="sendTestEmail('message')">
-                  💬 Test Message Email
-                </button>
-                <button class="btn btn-outline-secondary" type="button" onclick="sendTestEmail('profile_view')">
-                  👁️ Test Profile View Email
-                </button>
-              </div>
-            </div>
-
-            <div id="test-email-result"></div>
-          </div>
-
         </div>
       </div>
     </div>
   </div>
 </div>
-
-<script>
-function sendTestEmail(type) {
-    const resultDiv = document.getElementById('test-email-result');
-    resultDiv.innerHTML = '<div class="alert alert-info">Sending test email...</div>';
-
-    fetch('{% url "send_test_email" %}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}',
-        },
-        body: JSON.stringify({type: type})
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            resultDiv.innerHTML = '<div class="alert alert-success">✅ ' + data.message + '</div>';
-        } else {
-            resultDiv.innerHTML = '<div class="alert alert-danger">❌ Error: ' + data.error + '</div>';
-        }
-        setTimeout(() => { resultDiv.innerHTML = ''; }, 5000);
-    })
-    .catch(error => {
-        resultDiv.innerHTML = '<div class="alert alert-danger">❌ Network error: ' + error + '</div>';
-        setTimeout(() => { resultDiv.innerHTML = ''; }, 5000);
-    });
-}
-</script>
 {% endblock %}
