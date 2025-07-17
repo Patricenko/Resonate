@@ -17,15 +17,12 @@ from django.urls import reverse
 
 @login_required
 def match_view(request):
-    """Main matching interface - show potential matches"""
     current_user = request.user
 
-    # Get users that current user has already liked or passed on
     liked_users = Like.objects.filter(liker=current_user).values_list('liked', flat=True)
     passed_users = Pass.objects.filter(passer=current_user).values_list('passed', flat=True)
     interacted_users = list(liked_users) + list(passed_users)
 
-    # Get current user's preferences
     try:
         current_profile = Profile.objects.get(user=current_user)
         preferred_gender = current_profile.preferred_gender
@@ -33,10 +30,8 @@ def match_view(request):
         preferred_age_max = current_profile.preferred_age_max
         interests = current_profile.interests.split(",") if current_profile.interests else []
     except Profile.DoesNotExist:
-        # If user doesn't have a profile, redirect to create one
         return redirect('profiles:create_profile')
 
-    # Build filter query for potential matches
     potential_matches = Profile.objects.filter(
         is_public=True,
         age__gte=preferred_age_min,
@@ -47,28 +42,22 @@ def match_view(request):
         user__in=interacted_users
     )
 
-    # Filter by preferred gender if specified
-    if preferred_gender not in ['B', 'O']:  # Assuming B=both, O=other
+    if preferred_gender not in ['B', 'O']:
         potential_matches = potential_matches.filter(gender=preferred_gender)
 
-    # location-filtering
-    # Filter by location/distance if user has location preferences
     if hasattr(current_profile, 'location') and current_profile.location:
-        
-        # Initialize Google Maps client
+
         gmaps = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
         
         try:
-            # Get coordinates for current user's location
             current_location_result = gmaps.geocode(current_profile.location)
             if current_location_result:
                 current_coords = (
                     current_location_result[0]['geometry']['location']['lat'],
                     current_location_result[0]['geometry']['location']['lng']
                 )
-                
-                # Filter profiles within preferred distance (e.g., 50km)
-                max_distance_km = getattr(current_profile, 'max_distance', 50)  # Default 50km
+
+                max_distance_km = getattr(current_profile, 'max_distance', 50)
                 nearby_profiles = []
                 
                 for profile in potential_matches:
@@ -98,10 +87,8 @@ def match_view(request):
                     )
                 ).order_by('distance')
         except Exception:
-            # If geocoding fails, continue without location filtering
             pass
 
-    # Order potential matches based on distance, interests
     if interests:
         interest_cases = []
         for interest in interests:
@@ -117,13 +104,10 @@ def match_view(request):
             )
         ).order_by('-interest_match_score', '?')
     else:
-        # If no interests, order by creation date or randomly
         potential_matches = potential_matches.order_by('?')
 
-    # Get the first potential match
     next_profile = potential_matches.first()
 
-    # Prepare interests list safely
     interests_list = []
     if next_profile and next_profile.interests:
         interests_list = [interest.strip() for interest in next_profile.interests.split(",") if interest.strip()]
@@ -139,7 +123,6 @@ def match_view(request):
 
 @login_required
 def like_profile(request):
-    """Handle liking a profile via AJAX"""
     if request.method == 'POST':
         data = json.loads(request.body)
         profile_id = data.get('profile_id')
@@ -148,13 +131,11 @@ def like_profile(request):
             liked_profile = Profile.objects.get(id=profile_id)
             liked_user = liked_profile.user
 
-            # Create the like
             like, created = Like.objects.get_or_create(
                 liker=request.user,
                 liked=liked_user
             )
 
-            # Check if there's a mutual like (match)
             mutual_like = Like.objects.filter(
                 liker=liked_user,
                 liked=request.user
@@ -163,7 +144,6 @@ def like_profile(request):
             match_data = None
             is_match = False
             if mutual_like:
-                # Create a match
                 match, match_created = Match.objects.get_or_create(
                     user1=min(request.user, liked_user, key=lambda u: u.id),
                     user2=max(request.user, liked_user, key=lambda u: u.id)
@@ -171,7 +151,6 @@ def like_profile(request):
                 is_match = match_created
 
                 if match_created:
-                    # Get match data for popup
                     match_data = {
                         'match_id': match.id,
                         'other_user': {
@@ -181,7 +160,6 @@ def like_profile(request):
                             'age': liked_profile.age
                         }
                     }
-                    # ➕ Store name for animation screen
                     request.session['matched_user_name'] = liked_profile.name
 
             return JsonResponse({
@@ -199,7 +177,6 @@ def like_profile(request):
 
 @login_required
 def pass_profile(request):
-    """Handle passing on a profile via AJAX"""
     if request.method == 'POST':
         data = json.loads(request.body)
         profile_id = data.get('profile_id')
@@ -207,8 +184,7 @@ def pass_profile(request):
         try:
             passed_profile = Profile.objects.get(id=profile_id)
             passed_user = passed_profile.user
-            
-            # Create the pass
+
             pass_obj, created = Pass.objects.get_or_create(
                 passer=request.user,
                 passed=passed_user
@@ -224,15 +200,12 @@ def pass_profile(request):
 
 @login_required
 def matches_view(request):
-    """Show all matches for the current user"""
     current_user = request.user
-    
-    # Get all matches where current user is either user1 or user2
+
     matches = Match.objects.filter(
         Q(user1=current_user) | Q(user2=current_user)
     ).order_by('-created_at')
-    
-    # Prepare match data with the other user's profile
+
     match_data = []
     for match in matches:
         other_user = match.user2 if match.user1 == current_user else match.user1
@@ -246,8 +219,7 @@ def matches_view(request):
             })
         except Profile.DoesNotExist:
             continue
-    
-    # Mark all matches as seen when viewing the matches page
+
     for match in matches:
         match.mark_seen_by_user(current_user)
     
@@ -260,10 +232,8 @@ def matches_view(request):
 
 @login_required
 def get_new_matches_count(request):
-    """Get count of new matches for the current user"""
     current_user = request.user
-    
-    # Get all matches where current user is either user1 or user2 and hasn't seen them
+
     new_matches_count = Match.objects.filter(
         Q(user1=current_user, user1_seen=False) | 
         Q(user2=current_user, user2_seen=False)
@@ -274,7 +244,6 @@ def get_new_matches_count(request):
 
 @login_required
 def mark_match_seen(request):
-    """Mark a match as seen by the current user"""
     if request.method == 'POST':
         data = json.loads(request.body)
         match_id = data.get('match_id')
@@ -292,17 +261,14 @@ def mark_match_seen(request):
 
 @login_required
 def get_latest_match(request):
-    """Get the latest unseen match for popup notification"""
     current_user = request.user
-    
-    # Get the most recent unseen match
+
     latest_match = Match.objects.filter(
         Q(user1=current_user, user1_seen=False) | 
         Q(user2=current_user, user2_seen=False)
     ).order_by('-created_at').first()
     
     if latest_match:
-        # Get the other user's profile
         other_user = latest_match.user2 if latest_match.user1 == current_user else latest_match.user1
         try:
             other_profile = Profile.objects.get(user=other_user)
@@ -324,7 +290,6 @@ def get_latest_match(request):
 
 @login_required
 def get_profile_popup(request, profile_id):
-    """Get profile details for popup display"""
     try:
         profile = Profile.objects.get(id=profile_id)
 
@@ -354,7 +319,7 @@ def get_profile_popup(request, profile_id):
             'has_passed': has_passed,
             'is_match': is_match,
             'chat_url': chat_url,
-            'username': profile.user.username,  # ✅ Add this line
+            'username': profile.user.username,
             'gender': profile.get_gender_display()
         }
         return JsonResponse({
@@ -368,7 +333,6 @@ def get_profile_popup(request, profile_id):
 
 @login_required
 def matched_temp(request):
-    """Temporary animation screen after a successful match"""
     matched_user_name = request.session.get('matched_user_name', None)
     return render(request, 'matched.html', {'matched_user_name': matched_user_name})
 

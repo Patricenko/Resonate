@@ -87,7 +87,6 @@
     animation: pulseRed 0.8s ease;
   }
 
-  /* Persistent bright backgrounds during animation */
   .bg-pink {
     background-color: #abfb8b !important;
   }
@@ -231,7 +230,7 @@ function restartAnimation(el, className) {
 
 function likeProfile(profileId) {
   const body = document.body;
-  body.classList.add('bg-pink'); // Add persistent pink background
+  body.classList.add('bg-pink');
   restartAnimation(body, 'pulse-pink');
 
   const profileCard = document.getElementById('profile-card');
@@ -252,7 +251,7 @@ function likeProfile(profileId) {
         if (data.is_match && data.match_data) {
           if (window.showMatchNotification) window.showMatchNotification(data.match_data);
           setTimeout(() => {
-            body.classList.remove('bg-pink'); // Remove after done
+            body.classList.remove('bg-pink');
             loadNextProfile();
           }, 1000);
           window.location.href = "{% url 'matching:matched_temp' %}";
@@ -279,7 +278,7 @@ function likeProfile(profileId) {
 
 function passProfile(profileId) {
   const body = document.body;
-  body.classList.add('bg-red'); // Add persistent red background
+  body.classList.add('bg-red');
   restartAnimation(body, 'pulse-red');
 
   const profileCard = document.getElementById('profile-card');

@@ -13,27 +13,23 @@ class ProfileForm(forms.ModelForm):
     
     class Meta:
         model = Profile
-        fields = '__all__'  # alebo vymenuj konkrétne polia, ak chceš
+        fields = '__all__'
         exclude = ['user']
 
     def __init__(self, *args, **kwargs):
-        # Extract user instance if provided
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
-        # If we have a user instance, set the email field's initial value
         if self.user:
             self.fields['email'].initial = self.user.email
 
-        # Vlastné úpravy vzhľadu a atribútov polí
         self.fields['location'].widget.attrs.update({
-            'id': 'id_location',  # Dôležité pre Google Autocomplete
+            'id': 'id_location',
             'class': 'form-control',
             'placeholder': 'Zadaj adresu',
             'autocomplete': 'off'
         })
 
-        # Add accept attributes for file fields
         self.fields['audio_bio'].widget.attrs.update({
             'accept': 'audio/*'
         })
@@ -42,7 +38,6 @@ class ProfileForm(forms.ModelForm):
             'accept': 'image/*'
         })
 
-        # Globálne nastavenie CSS pre všetky textové polia (okrem boolean a file fields)
         for field_name, field in self.fields.items():
             if field.widget.__class__.__name__ not in ['CheckboxInput', 'ClearableFileInput']:
                 existing_class = field.widget.attrs.get('class', '')
@@ -52,7 +47,6 @@ class ProfileForm(forms.ModelForm):
         audio_file = self.cleaned_data.get('audio_bio')
         
         if audio_file:
-            # Check file extension and MIME type
             file_name = audio_file.name.lower()
             allowed_extensions = ['.mp3', '.wav', '.ogg', '.m4a', '.aac', '.flac']
             
@@ -60,14 +54,12 @@ class ProfileForm(forms.ModelForm):
                 raise ValidationError(
                     f'Please upload a valid audio file. Supported formats: {", ".join(allowed_extensions)}'
                 )
-            
-            # Check MIME type
+
             mime_type, _ = mimetypes.guess_type(audio_file.name)
             if mime_type and not mime_type.startswith('audio/'):
                 raise ValidationError('Please upload a valid audio file.')
-            
-            # Check file size (limit to 10MB)
-            if audio_file.size > 10 * 1024 * 1024:  # 10MB
+
+            if audio_file.size > 10 * 1024 * 1024:
                 raise ValidationError('Audio file size must be less than 10MB.')
         
         return audio_file
@@ -76,7 +68,6 @@ class ProfileForm(forms.ModelForm):
         image_file = self.cleaned_data.get('profile_photo')
         
         if image_file:
-            # Check file extension
             file_name = image_file.name.lower()
             allowed_extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.webp']
             
@@ -84,13 +75,11 @@ class ProfileForm(forms.ModelForm):
                 raise ValidationError(
                     f'Please upload a valid image file. Supported formats: {", ".join(allowed_extensions)}'
                 )
-            
-            # Check MIME type
+
             mime_type, _ = mimetypes.guess_type(image_file.name)
             if mime_type and not mime_type.startswith('image/'):
                 raise ValidationError('Please upload a valid image file.')
-            
-            # Check file size (limit to 5MB)
+
             if image_file.size > 5 * 1024 * 1024:  # 5MB
                 raise ValidationError('Image file size must be less than 5MB.')
         
@@ -99,13 +88,10 @@ class ProfileForm(forms.ModelForm):
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if email:
-            # Check if email is already taken by another user
             if self.user:
-                # Editing existing profile - exclude current user from check
                 if User.objects.filter(email=email).exclude(id=self.user.id).exists():
                     raise ValidationError('This email address is already in use.')
             else:
-                # Creating new profile
                 if User.objects.filter(email=email).exists():
                     raise ValidationError('This email address is already in use.')
         return email

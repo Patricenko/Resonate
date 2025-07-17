@@ -9,7 +9,7 @@ import json
 
 load_dotenv()
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")  # Replace with your actual Google Maps API key
+GOOGLE_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 
 @login_required
 def profile_detail_view(request, user_id):
@@ -17,7 +17,6 @@ def profile_detail_view(request, user_id):
         return redirect('profiles:profile_me')
     profile = get_object_or_404(Profile, user__id=user_id)
 
-    # Prepare interests list safely
     interests_list = []
     if profile.interests:
         interests_list = [i.strip() for i in profile.interests.split(",") if i.strip()]
@@ -40,7 +39,6 @@ def profile_me_view(request):
 
 @login_required
 def create_profile_view(request):
-    # Redirect if profile already exists
     if hasattr(request.user, 'profile'):
         return redirect('profiles:profile_me')
 
@@ -49,7 +47,7 @@ def create_profile_view(request):
         "Reading", "Travel", "Cooking", "Fitness", "Movies"
     ]
 
-    social_labels = ["Email", "Discord", "Instagram", "X"]  # doplnené pre šablónu
+    social_labels = ["Email", "Discord", "Instagram", "X"]
 
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, user=request.user)
@@ -58,18 +56,15 @@ def create_profile_view(request):
             profile.user = request.user
             profile.is_public = True
 
-            # Update user's email
             email = form.cleaned_data.get('email')
             if email:
                 request.user.email = email
                 request.user.save()
 
-            # Clean and save interests manually
             interests_str = request.POST.get('interests', '')
             interests_list = [i.strip().lower() for i in interests_str.split(",") if i.strip()]
             profile.interests = ",".join(interests_list)
 
-            # Optional: parse social_links JSON string if needed
             social_links_json = request.POST.get('social_links', '{}')
             try:
                 social_links = json.loads(social_links_json)
@@ -87,7 +82,7 @@ def create_profile_view(request):
         'form': form,
         'GOOGLE_API_KEY': GOOGLE_API_KEY,
         'premade_interests': premade_interests,
-        'social_labels': social_labels,  # doplnené pre použitie v šablóne
+        'social_labels': social_labels,
     })
 
 
@@ -114,7 +109,6 @@ def edit_profile_view(request):
         if form.is_valid():
             profile = form.save(commit=False)
 
-            # Update user's email
             email = form.cleaned_data.get('email')
             if email:
                 request.user.email = email

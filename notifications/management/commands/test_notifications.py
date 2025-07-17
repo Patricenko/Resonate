@@ -21,7 +21,6 @@ class Command(BaseCommand):
         self.stdout.write(f"🧪 Testing Email Notifications for: {email}")
         self.stdout.write("=" * 50)
 
-        # Get or create test user
         try:
             user = User.objects.get(email=email)
             self.stdout.write(f"✅ Using existing user: {user.username}")
@@ -34,12 +33,10 @@ class Command(BaseCommand):
             )
             self.stdout.write(f"✅ Created test user: {user.username}")
 
-        # Create notification preferences
         prefs, created = NotificationPreference.objects.get_or_create(user=user)
         if created:
             self.stdout.write("✅ Created notification preferences")
 
-        # Test different types of notifications
         tests = [
             ('Welcome Email', lambda: EmailNotificationService.send_welcome_email(user)),
             ('Match Notification', lambda: EmailNotificationService.send_match_notification(user, user)),
@@ -59,7 +56,6 @@ class Command(BaseCommand):
             except Exception as e:
                 self.stdout.write(f"   ❌ Error: {str(e)}")
 
-        # Show summary
         self.stdout.write("\n📊 Email Notification Summary:")
         self.stdout.write("-" * 35)
         total = EmailNotification.objects.filter(recipient=user).count()
