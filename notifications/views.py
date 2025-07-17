@@ -48,6 +48,8 @@ def send_test_email(request):
             success = EmailNotificationService.send_match_notification(request.user, request.user)
         elif notification_type == 'like':
             success = EmailNotificationService.send_like_notification(request.user, request.user)
+        elif notification_type == 'message':
+            success = EmailNotificationService.send_message_notification(request.user, request.user, "This is a test message to show how notifications work!")
         elif notification_type == 'profile_view':
             success = EmailNotificationService.send_profile_view_notification(request.user, request.user)
         else:

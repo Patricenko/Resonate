@@ -1,0 +1,30 @@
+{% extends "notifications/emails/base_email.html" %}
+
+{% block content %}
+<h2>💬 New message from {{ sender.first_name|default:sender.username }}!</h2>
+
+<p>Hello {{ user.first_name|default:user.username }},</p>
+
+<p>You have a new message on {{ site_name }}!</p>
+
+<div style="background-color: #f0f8ff; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #e91e63;">
+    <h3><span class="highlight">{{ sender.first_name|default:sender.username }}</span> sent you a message:</h3>
+    {% if sender.profile.profile_photo %}
+    <img src="{{ sender.profile.profile_photo.url }}" alt="Profile photo" style="width: 60px; height: 60px; border-radius: 50%; margin: 10px 0;">
+    {% endif %}
+    <div style="background-color: white; padding: 15px; border-radius: 8px; margin: 15px 0; font-style: italic;">
+        "{{ message_preview }}"
+    </div>
+</div>
+
+<p>Don't keep them waiting! Reply to continue your conversation.</p>
+
+<div style="text-align: center; margin: 30px 0;">
+    <a href="http://127.0.0.1:8000/rtchat/" class="button">Reply Now 💬</a>
+</div>
+
+<p>Keep the conversation going and see where it leads! 😊</p>
+
+<p>Happy chatting,<br>
+<strong>The {{ site_name }} Team</strong></p>
+{% endblock %}

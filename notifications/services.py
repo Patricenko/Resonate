@@ -135,3 +135,27 @@ class EmailNotificationService:
         html_content = render_to_string('notifications/emails/profile_view_notification.html', context)
         
         return cls.send_email_notification(profile_owner, 'profile_view', subject, html_content)
+
+    @classmethod
+    def send_message_notification(cls, recipient, sender, message_preview):
+        """Send notification when someone sends you a message"""
+        preferences = cls.get_user_preferences(recipient)
+        
+        if not preferences.email_on_message or not recipient.email:
+            return False
+
+        # Don't send notification if recipient is the sender
+        if recipient == sender:
+            return False
+
+        context = {
+            'user': recipient,
+            'sender': sender,
+            'message_preview': message_preview,
+            'site_name': 'Resonate',
+        }
+
+        subject = f"💬 New message from {sender.username} on Resonate!"
+        html_content = render_to_string('notifications/emails/message_notification.html', context)
+        
+        return cls.send_email_notification(recipient, 'message', subject, html_content)

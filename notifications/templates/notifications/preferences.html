@@ -192,14 +192,6 @@
                     <small class="text-muted">Get notified when someone likes your profile</small>
                   </label>
                 </div>
-
-                <div class="form-check d-flex align-items-center mb-3">
-                  <input class="form-check-input me-3" type="checkbox" id="daily_digest" name="daily_digest" {% if preferences.daily_digest %}checked{% endif %}>
-                  <label class="form-check-label flex-grow-1" for="daily_digest">
-                    <div><strong>📊 Daily Digest</strong></div>
-                    <small class="text-muted">Get a daily summary of your activity</small>
-                  </label>
-                </div>
               </div>
 
               <div class="col-md-6">
@@ -247,6 +239,9 @@
               <div>
                 <button class="btn btn-outline-secondary" type="button" onclick="sendTestEmail('like')">
                   💖 Test Like Email
+                </button>
+                <button class="btn btn-outline-secondary" type="button" onclick="sendTestEmail('message')">
+                  💬 Test Message Email
                 </button>
                 <button class="btn btn-outline-secondary" type="button" onclick="sendTestEmail('profile_view')">
                   👁️ Test Profile View Email
