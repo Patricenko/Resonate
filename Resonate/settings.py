@@ -36,9 +36,20 @@ load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
+
+# Security settings for production
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_SSL_REDIRECT = False  # Set to True if using HTTPS
+    SESSION_COOKIE_SECURE = False  # Set to True if using HTTPS
+    CSRF_COOKIE_SECURE = False  # Set to True if using HTTPS
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 LOGIN_URL = "/users/login/"  # or wherever your login view is
 
