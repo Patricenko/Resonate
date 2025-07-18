@@ -31,7 +31,6 @@ class Command(BaseCommand):
                 self.style.WARNING('DRY RUN MODE - No emails will be sent')
             )
 
-        # Get users who should receive digest emails
         users_query = User.objects.filter(is_active=True, email__isnull=False)
         if user_id:
             users_query = users_query.filter(id=user_id)
@@ -41,19 +40,16 @@ class Command(BaseCommand):
 
         for user in users_query:
             try:
-                # Check if user has notification preferences
                 if not hasattr(user, 'notification_preferences'):
                     users_skipped += 1
                     continue
 
-                # Skip if user has opted out of all notifications
                 prefs = user.notification_preferences
                 if not any([prefs.email_on_match, prefs.email_on_like, 
                            prefs.email_on_message, prefs.email_on_profile_view]):
                     users_skipped += 1
                     continue
 
-                # Check if we've already sent a digest email today
                 today = timezone.now().date()
                 existing_digest = EmailNotification.objects.filter(
                     recipient=user,
@@ -65,7 +61,6 @@ class Command(BaseCommand):
                     users_skipped += 1
                     continue
 
-                # Count recent activity for this user
                 recent_activity = self.get_recent_activity(user)
 
                 if not recent_activity['has_activity']:
@@ -95,13 +90,10 @@ class Command(BaseCommand):
         )
 
     def get_recent_activity(self, user):
-        """Get recent activity for a user in the last 24 hours"""
         yesterday = timezone.now() - timedelta(days=1)
-        
-        # Count recent likes received
+
         recent_likes = user.received_likes.filter(created_at__gte=yesterday).count()
-        
-        # Count recent matches
+
         recent_matches = user.matches_as_user1.filter(created_at__gte=yesterday).count() + \
                         user.matches_as_user2.filter(created_at__gte=yesterday).count()
 
@@ -114,7 +106,6 @@ class Command(BaseCommand):
         }
 
     def send_digest_email(self, user, activity):
-        """Send digest email to user"""
         try:
             from django.template.loader import render_to_string
             from django.conf import settings

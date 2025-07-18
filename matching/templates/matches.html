@@ -5,7 +5,6 @@
 
 {% block extra_css %}
 <style>
-  /* Your original CSS styles exactly as given */
   .matches-container {
     max-width: 800px;
     margin: 0 auto;
@@ -413,7 +412,6 @@
     .catch(() => alert('An error occurred. Please try again.'));
   }
 
-  // Spacebar toggles audio play/pause if audio exists in popup
   document.addEventListener('keydown', function(event) {
     if ((event.code === 'Space' || event.key === ' ') && document.getElementById('profile-popup')) {
       const audioElem = document.getElementById('profile-audio-bio');

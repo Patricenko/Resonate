@@ -31,7 +31,6 @@
 
 
 <script>
-  // Ensure audio plays even if browser blocks autoplay
   const matchSound = document.getElementById('matchSound');
   matchSound.volume = 0.8;
 
@@ -42,14 +41,12 @@
       document.removeEventListener("keydown", playAudio);
     };
 
-    // In case autoplay fails, wait for user interaction
     matchSound.play().catch(() => {
       document.addEventListener("click", playAudio);
       document.addEventListener("keydown", playAudio);
     });
   });
 
-  // Redirect after 3 seconds
   setTimeout(() => {
     window.location.href = "{% url 'matching:matches' %}";
   }, 3000);

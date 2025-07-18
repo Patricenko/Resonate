@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
 <style>
-  /* Chat window background */
   #chat_window {
     height: 70vh;
     display: flex;
@@ -11,8 +10,6 @@
     border-radius: 16px;
     box-shadow: 0 0 20px #ff69b4aa;
   }
-
-  /* Scroll container */
   #chat_container {
     overflow-y: auto;
     flex-grow: 1;
@@ -28,7 +25,6 @@
     gap: 1rem;
   }
 
-  /* Chat bubbles */
   .chat-bubble-left,
   .chat-bubble-right {
     padding: 1rem 2rem;
@@ -42,27 +38,23 @@
     color: white;
   }
 
-  /* Left bubble specifics */
   .chat-bubble-left {
     border-bottom-left-radius: 0;
     align-self: flex-start;
     position: relative;
   }
 
-  /* Tail for left bubble */
   .chat-bubble-left-tail {
     margin-right: -6px;
     margin-bottom: 8px;
     fill: #ff69b4; /* matching pink fill */
   }
 
-  /* Right bubble specifics */
   .chat-bubble-right {
     border-bottom-right-radius: 0;
     align-self: flex-end;
   }
 
-  /* List item flex styling */
   li.flex {
     display: flex;
   }
@@ -79,13 +71,11 @@
     margin-bottom: 1rem;
   }
 
-  /* Username below messages */
   small.text-muted {
     color: #ddd;
     margin-left: 3rem;
   }
 
-  /* Input and send button */
   form#chat_message_form {
     display: flex;
     gap: 0.5rem;
@@ -128,9 +118,10 @@
 
 <main class="container mt-4">
   <div id="chat_window" class="chat-card card shadow p-3">
-    <div class="text-center text-pink border-bottom pb-2">
-      <span id="online-count">3</span> online
+    <div class="text-center text-pink border-bottom pb-2 d-flex justify-content-center align-items-center gap-2" style="font-size: 2rem;">
+      <span>Resonating with <img src="{{ other_user.profile.profile_photo.url }}" class="rounded-circle" width="40" height="40" alt="{{ other_user.username }}"> <strong>{{ other_user.username }}</strong></span>
     </div>
+
 
     <div id="chat_container">
       <ul id="chat_messages">
@@ -193,8 +184,16 @@
     }
 
     messageList.appendChild(li);
+
     const chatContainer = document.getElementById('chat_container');
     chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    // 🧹 Clear input for current user
+    const input = document.querySelector('#chat_message_form input[name="message"]');
+    if (data.username === currentUser && input) {
+      input.value = '';
+    }
   });
 </script>
+
 {% endblock %}
