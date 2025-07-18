@@ -158,7 +158,6 @@
   </div>
 </div>
 
-<!-- Cropper modal -->
 <div id="cropper-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.8); z-index:1050;
   display: flex; justify-content: center; align-items: center;">
   <div style="position: relative; max-width: 90vw; max-height: 80vh; background: #222; padding: 1rem; border-radius: 8px;
@@ -179,7 +178,6 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  // Interests toggle buttons
   const buttons = document.querySelectorAll(".interest-button");
   const hiddenInput = document.getElementById("id_interests");
   let selected = hiddenInput.value ? hiddenInput.value.split(",") : [];
@@ -207,7 +205,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Cropper logic for profile photo
   const inputFile = document.querySelector('input[type="file"][name="profile_photo"]');
   const cropperModal = document.getElementById("cropper-modal");
   const cropperImage = document.getElementById("cropper-image");
@@ -246,7 +243,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   cropperCancel.addEventListener("click", () => {
     cropperModal.style.display = "none";
-    if(inputFile) inputFile.value = ""; // reset input if cancel
+    if(inputFile) inputFile.value = "";
     if (cropper) {
       cropper.destroy();
       cropper = null;
@@ -274,7 +271,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }, "image/png");
   });
 
-  // Social links logic
   const socialInputs = document.querySelectorAll(".social-input");
   const hiddenSocialField = document.getElementById("id_social_links");
   const addCustomBtn = document.getElementById("add-custom-social");
@@ -297,7 +293,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-    // For custom entries, create inputs dynamically if needed
     Object.keys(socialData).forEach(key => {
       if (![...socialInputs].some(input => input.name.replace("social_", "") === key)) {
         const div = document.createElement("div");
@@ -355,7 +350,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
-  // Google Maps Places Autocomplete callback
   function initAutocomplete() {
       const autocompleteInput = document.getElementById('autocomplete');
       const hiddenLocation = document.getElementById('id_location');
@@ -373,18 +367,16 @@ document.addEventListener("DOMContentLoaded", function () {
         let city = '';
         let country = '';
 
-        // Find country as before
         for (const component of place.address_components) {
           const types = component.types;
           if (types.includes("country")) country = component.long_name;
         }
 
-        // Find city from multiple possible types, fallback in order
         const cityTypes = [
           "locality",
-          "postal_town",             // UK/Europe sometimes
-          "administrative_area_level_2",  // US counties or cities
-          "administrative_area_level_1",  // US states sometimes
+          "postal_town",
+          "administrative_area_level_2",
+          "administrative_area_level_1",
           "sublocality_level_1",
           "sublocality"
         ];
@@ -397,14 +389,12 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         }
 
-        // Build final string
         const cleanLocation = `${city}${country ? ', ' + country : ''}`;
         hiddenLocation.value = cleanLocation;
         autocompleteInput.value = cleanLocation;
 
       });
 
-      // Prefill autocomplete input if hidden field has a value
       if (hiddenLocation.value) {
         autocompleteInput.value = hiddenLocation.value;
       }
@@ -440,7 +430,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 </style>
 
-<!-- Google Maps API -->
 <script
   src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_API_KEY }}&libraries=places&callback=initAutocomplete"
   async

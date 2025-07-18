@@ -29,11 +29,8 @@ urlpatterns = [
     path('matching/', include('matching.urls', namespace='matching')),
     path('notifications/', include('notifications.urls')),
     path('rtchat/', include(('rtchat.urls', 'rtchat'), namespace='rtchat')),
-    path('', index_view, name='index'),  # Homepage view
+    path('', index_view, name='index'),
 ]
-
-# Serve media files during development
-# Serve static and media files when running locally
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
