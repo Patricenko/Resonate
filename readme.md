@@ -34,7 +34,7 @@ Follow the instructions below to set up the project locally.
 1. **Clone the repository:**
 
 ```bash
-git clone https://github.com/yourusername/resonate.git
+git clone https://github.com/Patricenko/resonate.git
 cd resonate
 ```
 
@@ -88,7 +88,6 @@ http://127.0.0.1:8000/
 
 ## Additional Notes
 
-- The logo file is located at `Dinter/static/images/resonance2.png`.  
   For it to appear in this README on GitHub, you may want to copy it to the root or a docs folder or upload it to GitHub separately and link it with an absolute URL.  
 - Make sure your Django static files are properly configured to serve static assets in development and production.
 - For profile images and audio playback, ensure your media files are properly configured and served.
